@@ -1,0 +1,103 @@
+<div class="setup-container">
+  <div class="setup-card">
+    <div class="logo-area">
+      <div class="logo">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <rect width="48" height="48" rx="10" fill="#4f6ef8"/>
+          <path d="M12 29h24" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M22 29c0-5 3.5-9 8-11" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <circle cx="12" cy="29" r="2.8" fill="#fff"/>
+          <circle cx="22" cy="29" r="2.8" fill="#fff"/>
+          <circle cx="36" cy="29" r="2.8" fill="#fff"/>
+          <circle cx="30" cy="18" r="2.8" fill="#fff"/>
+        </svg>
+      </div>
+      <h1>EditGit</h1>
+      <p class="subtitle">Video Version Control</p>
+    </div>
+
+    <div class="actions">
+      <div class="new-project">
+        <h2>New Project</h2>
+
+        <div class="field">
+          <label>Project Name</label>
+          <input
+            type="text"
+            placeholder="My Video Project"
+            [value]="projectName()"
+            (input)="projectName.set($any($event.target).value)"
+          />
+        </div>
+
+        <div class="field">
+          <label>Project Folder</label>
+          <div class="folder-picker">
+            <span class="path-display">{{ selectedPath() || 'No folder selected' }}</span>
+            <button class="btn-secondary" (click)="selectFolder()">Browse</button>
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="error-msg">{{ error() }}</div>
+        }
+
+        <button
+          class="btn-primary"
+          [disabled]="!selectedPath() || !projectName()"
+          (click)="initProject()"
+        >
+          Initialize Project
+        </button>
+      </div>
+
+      @if (recentProjects().length > 0) {
+        <div class="recent-projects">
+          <h2>Recent Projects</h2>
+          <div class="recent-list">
+            @for (project of recentProjects(); track project.path) {
+              <button class="recent-item" (click)="openRecent(project)">
+                <div class="recent-name">{{ project.name }}</div>
+                <div class="recent-path">{{ project.path }}</div>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (backups().length > 0) {
+        <div class="recover-section">
+          <h2>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2.5 8a5.5 5.5 0 1110.6 2.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M2.5 3.5v4.5h4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Recover from Backup
+          </h2>
+          <p class="recover-hint">Deleted your project folder? Recover it from a previous backup.</p>
+          <div class="backup-list">
+            @for (entry of backups(); track entry.original_path) {
+              <div class="backup-item">
+                <div class="backup-info">
+                  <div class="backup-name">{{ entry.name }}</div>
+                  <div class="backup-path">{{ entry.original_path }}</div>
+                  <div class="backup-date">Last backup: {{ formatBackupDate(entry.last_backup) }}</div>
+                </div>
+                <button
+                  class="btn-recover"
+                  (click)="recoverFromBackup(entry)"
+                  [disabled]="recovering()"
+                >
+                  {{ recovering() ? 'Recovering...' : 'Recover' }}
+                </button>
+              </div>
+            }
+          </div>
+          @if (recoverError()) {
+            <div class="error-msg">{{ recoverError() }}</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

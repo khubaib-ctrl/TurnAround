@@ -1,0 +1,386 @@
+@use '../../../styles/variables' as *;
+
+.ghost-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $bg-secondary;
+}
+
+.sidebar-header {
+  padding: 16px;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  h3 {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+}
+
+.branch-controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.branch-select {
+  flex: 1;
+  padding: 6px 10px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: $radius-sm;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+
+  option {
+    background: $bg-tertiary;
+    color: $text-primary;
+  }
+}
+
+.icon-btn-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $radius-sm;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-primary;
+  }
+}
+
+.new-branch-form {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+
+  input {
+    flex: 1;
+    padding: 6px 10px;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    color: $text-primary;
+    font-size: $font-size-sm;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: $accent-primary;
+    }
+  }
+
+  .btn-create {
+    padding: 6px 12px;
+    background: $accent-primary;
+    border-radius: $radius-sm;
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.delete-branch-btn {
+  &:hover {
+    color: #f87171 !important;
+    background: rgba(248, 113, 113, 0.1) !important;
+  }
+}
+
+.delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(248, 113, 113, 0.05);
+  border: 1px solid rgba(248, 113, 113, 0.15);
+  border-radius: $radius-sm;
+
+  .delete-label {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    font-weight: 500;
+  }
+
+  .delete-select {
+    width: 100%;
+  }
+
+  .delete-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .btn-delete {
+    flex: 1;
+    padding: 6px 12px;
+    background: #dc2626;
+    border-radius: $radius-sm;
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &:hover {
+      background: #b91c1c;
+    }
+  }
+
+  .btn-cancel {
+    flex: 1;
+    padding: 6px 12px;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+
+    &:hover {
+      background: $bg-hover;
+      color: $text-primary;
+    }
+  }
+}
+
+.branch-error {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: $font-size-xs;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.08);
+  border-radius: $radius-sm;
+}
+
+.commit-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.commit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background $transition-fast;
+  position: relative;
+
+  &:hover {
+    background: $bg-tertiary;
+
+    .commit-actions {
+      opacity: 1;
+    }
+  }
+
+  &.selected {
+    background: $bg-surface;
+    border: 1px solid $border-light;
+  }
+}
+
+.commit-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity $transition-fast;
+}
+
+.commit-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: $radius-sm;
+  background: transparent;
+  color: $text-muted;
+  transition: all $transition-fast;
+  cursor: pointer;
+
+  &.download-btn:hover {
+    color: $accent-primary;
+    background: rgba(96, 165, 250, 0.12);
+  }
+
+  &.delete-btn:hover {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+  }
+}
+
+.export-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: $font-size-xs;
+  border-top: 1px solid $border-color;
+
+  &.success {
+    background: rgba(34, 197, 94, 0.08);
+    color: #4ade80;
+  }
+
+  &.error {
+    background: rgba(248, 113, 113, 0.08);
+    color: #f87171;
+  }
+
+  span {
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .export-dismiss {
+    flex-shrink: 0;
+    margin-left: 8px;
+    background: transparent;
+    color: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.commit-delete-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 2px 6px;
+  padding: 10px;
+  background: rgba(248, 113, 113, 0.05);
+  border: 1px solid rgba(248, 113, 113, 0.15);
+  border-radius: $radius-sm;
+
+  > span {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  .delete-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .btn-delete {
+    flex: 1;
+    padding: 6px 12px;
+    background: #dc2626;
+    border-radius: $radius-sm;
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: 500;
+
+    &:hover {
+      background: #b91c1c;
+    }
+  }
+
+  .btn-cancel {
+    flex: 1;
+    padding: 6px 12px;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+
+    &:hover {
+      background: $bg-hover;
+      color: $text-primary;
+    }
+  }
+}
+
+.commit-indicator {
+  flex-shrink: 0;
+  margin-top: 3px;
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $text-muted;
+  }
+
+  &.milestone {
+    color: $milestone-gold;
+  }
+}
+
+.commit-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.commit-message {
+  font-size: $font-size-sm;
+  color: $text-primary;
+  font-weight: 500;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.commit-meta {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  margin-top: 3px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+
+  p {
+    color: $text-muted;
+    font-size: $font-size-sm;
+  }
+
+  .hint {
+    font-size: $font-size-xs;
+    margin-top: 4px;
+  }
+}

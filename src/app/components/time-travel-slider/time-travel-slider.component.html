@@ -1,0 +1,37 @@
+<div class="time-travel-slider">
+  <div class="slider-label">
+    <span class="label-text">Time Travel</span>
+    @if (hoveredCommit()) {
+      <span class="hover-tooltip">{{ hoveredCommit()!.message }}</span>
+    }
+  </div>
+
+  <div class="slider-track">
+    <input
+      type="range"
+      [min]="0"
+      [max]="max()"
+      [value]="currentIndex()"
+      [disabled]="history().length < 2"
+      (input)="onSliderChange($event)"
+      (mousemove)="onSliderHover($event)"
+      (mouseleave)="onSliderLeave()"
+    />
+    <div class="tick-marks">
+      @for (commit of history(); track commit.id; let i = $index) {
+        <div
+          class="tick"
+          [class.milestone]="commit.is_milestone"
+          [class.active]="currentIndex() === i"
+          [style.left.%]="max() > 0 ? (i / max()) * 100 : 50"
+        ></div>
+      }
+    </div>
+  </div>
+
+  <div class="slider-info">
+    @if (history().length > 0) {
+      <span class="version-count">{{ history().length }} version{{ history().length !== 1 ? 's' : '' }}</span>
+    }
+  </div>
+</div>

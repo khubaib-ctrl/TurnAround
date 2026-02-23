@@ -1,0 +1,20 @@
+@use '../../../styles/variables' as *;
+
+.milestone-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba($milestone-gold, 0.1);
+  border: 1px solid rgba($milestone-gold, 0.25);
+  border-radius: $radius-md;
+  color: $milestone-gold;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: rgba($milestone-gold, 0.18);
+    border-color: rgba($milestone-gold, 0.4);
+  }
+}

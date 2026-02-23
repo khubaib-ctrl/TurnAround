@@ -1,0 +1,213 @@
+@use '../../../styles/variables' as *;
+
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog-card {
+  width: 440px;
+  max-height: 80vh;
+  background: $bg-secondary;
+  border: 1px solid $border-color;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid $border-color;
+
+  h2 {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  .close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-sm;
+    background: transparent;
+    color: $text-muted;
+
+    &:hover {
+      background: $bg-hover;
+      color: $text-primary;
+    }
+  }
+}
+
+.dialog-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.changed-files {
+  margin-bottom: 16px;
+
+  label {
+    display: block;
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .file-list {
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-sm;
+    padding: 6px;
+    max-height: 100px;
+    overflow-y: auto;
+  }
+
+  .file-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    font-family: $font-mono;
+
+    svg {
+      color: $diff-modified;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.field {
+  margin-bottom: 14px;
+
+  label {
+    display: block;
+    font-size: $font-size-xs;
+    color: $text-muted;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    background: $bg-tertiary;
+    border: 1px solid $border-color;
+    border-radius: $radius-md;
+    color: $text-primary;
+    font-size: $font-size-base;
+    resize: vertical;
+    min-height: 72px;
+    line-height: 1.4;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: $accent-primary;
+    }
+  }
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: 14px;
+
+  input {
+    display: none;
+  }
+
+  .checkmark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: $radius-sm;
+    border: 1.5px solid $border-light;
+    background: $bg-tertiary;
+    color: $milestone-gold;
+    transition: all $transition-fast;
+  }
+
+  input:checked + .checkmark {
+    background: rgba($milestone-gold, 0.15);
+    border-color: $milestone-gold;
+  }
+}
+
+.error-msg {
+  padding: 8px 12px;
+  background: $diff-removed-bg;
+  border: 1px solid rgba($danger, 0.3);
+  border-radius: $radius-sm;
+  color: $danger;
+  font-size: $font-size-sm;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid $border-color;
+}
+
+.btn-cancel {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-weight: 500;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-primary;
+  }
+}
+
+.btn-commit {
+  padding: 8px 20px;
+  background: $accent-gradient;
+  border-radius: $radius-md;
+  color: white;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  transition: opacity $transition-fast;
+
+  &.milestone {
+    background: linear-gradient(135deg, $milestone-gold, #d97706);
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

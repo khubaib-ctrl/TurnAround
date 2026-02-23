@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "src-tauri",
+    "otio-sys",
+]
+resolver = "2"

@@ -1,0 +1,56 @@
+// EditGit Dark Theme - Professional video editing aesthetic
+$bg-primary: #0d0f12;
+$bg-secondary: #141720;
+$bg-tertiary: #1a1e2a;
+$bg-surface: #1e2233;
+$bg-hover: #252a3a;
+$bg-active: #2a3045;
+
+$text-primary: #e4e6ed;
+$text-secondary: #a0a5b8;
+$text-muted: #636882;
+
+$accent-primary: #6c8cff;
+$accent-secondary: #8b5cf6;
+$accent-gradient: linear-gradient(135deg, $accent-primary, $accent-secondary);
+
+$success: #34d399;
+$warning: #fbbf24;
+$danger: #f87171;
+
+$diff-added: #22c55e;
+$diff-removed: #ef4444;
+$diff-modified: #eab308;
+$diff-added-bg: rgba(34, 197, 94, 0.12);
+$diff-removed-bg: rgba(239, 68, 68, 0.12);
+$diff-modified-bg: rgba(234, 179, 8, 0.12);
+
+$milestone-gold: #f59e0b;
+
+$border-color: #2a2f40;
+$border-light: #353b50;
+
+$font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+$font-size-xs: 0.7rem;
+$font-size-sm: 0.8rem;
+$font-size-base: 0.875rem;
+$font-size-md: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-xl: 1.5rem;
+
+$radius-sm: 4px;
+$radius-md: 6px;
+$radius-lg: 10px;
+$radius-xl: 14px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+$shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
+
+$sidebar-width: 320px;
+$toolbar-height: 48px;
+$slider-height: 64px;
+
+$transition-fast: 150ms ease;
+$transition-normal: 250ms ease;

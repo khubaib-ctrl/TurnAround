@@ -1,0 +1,80 @@
+<div class="dialog-overlay" (click)="onOverlayClick($event)">
+  <div class="dialog-card">
+    <div class="dialog-header">
+      <h2>{{ markAsMilestone() ? 'Create Milestone' : 'Save Version' }}</h2>
+      <button class="close-btn" (click)="close()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="dialog-body">
+      @if (changedFiles().length > 0) {
+        <div class="changed-files">
+          <label>Changed Files</label>
+          <div class="file-list">
+            @for (file of changedFiles(); track file) {
+              <div class="file-item">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <rect x="1.5" y="1" width="9" height="10" rx="1.5" stroke="currentColor" stroke-width="1"/>
+                  <path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" stroke-width="0.8" stroke-linecap="round"/>
+                </svg>
+                <span>{{ getFileName(file) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="field">
+        <label>Description</label>
+        <textarea
+          rows="3"
+          placeholder="What changed in this version?"
+          [value]="message()"
+          (input)="message.set($any($event.target).value)"
+          (keydown.meta.enter)="commit()"
+          (keydown.control.enter)="commit()"
+          autofocus
+        ></textarea>
+      </div>
+
+      <label class="checkbox-field">
+        <input
+          type="checkbox"
+          [checked]="markAsMilestone()"
+          (change)="markAsMilestone.set($any($event.target).checked)"
+        />
+        <span class="checkmark">
+          @if (markAsMilestone()) {
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 0.5l1.32 2.68L10 3.93l-2.25 2.19.53 3.1L6 7.77 3.72 9.22l.53-3.1L2 3.93l2.68-.75L6 0.5z" fill="currentColor"/>
+            </svg>
+          }
+        </span>
+        <span>Mark as Milestone</span>
+      </label>
+
+      @if (error()) {
+        <div class="error-msg">{{ error() }}</div>
+      }
+    </div>
+
+    <div class="dialog-footer">
+      <button class="btn-cancel" (click)="close()">Cancel</button>
+      <button
+        class="btn-commit"
+        [class.milestone]="markAsMilestone()"
+        [disabled]="saving() || !message().trim()"
+        (click)="commit()"
+      >
+        @if (saving()) {
+          Saving...
+        } @else {
+          {{ markAsMilestone() ? 'Create Milestone' : 'Save Version' }}
+        }
+      </button>
+    </div>
+  </div>
+</div>

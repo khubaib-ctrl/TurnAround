@@ -1,0 +1,295 @@
+<div class="ghost-timeline">
+  @if (compareMode()) {
+    <!-- COMPARE MODE -->
+    <div class="compare-panel">
+      <div class="compare-header">
+        <h3>Compare Versions</h3>
+        <button class="compare-close" (click)="exitCompare()" title="Exit compare">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="compare-pickers">
+        <div class="picker-group">
+          <label class="picker-label">Older version</label>
+          <select class="picker-select" (change)="onSelectA($event)">
+            <option value="">Select a version...</option>
+            @for (commit of history(); track commit.id) {
+              <option [value]="commit.id" [disabled]="commit.id === compareCommitB()">{{ commit.message }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="picker-arrow">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="picker-group">
+          <label class="picker-label">Newer version</label>
+          <select class="picker-select" (change)="onSelectB($event)">
+            <option value="">Select a version...</option>
+            @for (commit of history(); track commit.id) {
+              <option [value]="commit.id" [disabled]="commit.id === compareCommitA()">{{ commit.message }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <button
+        class="compare-run-btn"
+        [disabled]="!canCompare() || compareLoading()"
+        (click)="runCompare()"
+      >
+        {{ compareLoading() ? 'Comparing...' : 'Compare' }}
+      </button>
+
+      @if (compareError()) {
+        <div class="compare-error">{{ compareError() }}</div>
+      }
+    </div>
+
+    @if (compareLoading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Comparing versions...</p>
+      </div>
+    } @else if (hasCompareResult()) {
+      <div class="compare-results">
+        <div class="compare-summary">
+          <div class="compare-versions-label">
+            <span class="version-tag old">{{ compareResult()!.commitA.message }}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M10 5l3 3-3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="version-tag new">{{ compareResult()!.commitB.message }}</span>
+          </div>
+          <div class="summary-badges">
+            @if (compareResult()!.summary.added > 0) {
+              <span class="badge badge-added">+{{ compareResult()!.summary.added }} added</span>
+            }
+            @if (compareResult()!.summary.removed > 0) {
+              <span class="badge badge-removed">-{{ compareResult()!.summary.removed }} removed</span>
+            }
+            @if (compareResult()!.summary.modified > 0) {
+              <span class="badge badge-modified">~{{ compareResult()!.summary.modified }} modified</span>
+            }
+            @if (compareResult()!.summary.unchanged > 0) {
+              <span class="badge badge-unchanged">{{ compareResult()!.summary.unchanged }} unchanged</span>
+            }
+          </div>
+        </div>
+
+        <div class="compare-file-list">
+          @for (file of compareResult()!.files; track file.file_path) {
+            <div class="compare-file-item" [class]="getDiffStatusClass(file.status)">
+              <div class="file-status-indicator">
+                @switch (file.status) {
+                  @case ('added') { <span class="status-label added">ADD</span> }
+                  @case ('removed') { <span class="status-label removed">DEL</span> }
+                  @case ('modified') { <span class="status-label modified">MOD</span> }
+                  @case ('unchanged') { <span class="status-label unchanged">—</span> }
+                }
+              </div>
+              <div class="file-details">
+                <div class="compare-file-name">
+                  @if (getFileDir(file.file_path)) {
+                    <span class="compare-file-dir">{{ getFileDir(file.file_path) }}</span>
+                  }
+                  {{ getFileName(file.file_path) }}
+                </div>
+                <div class="compare-file-meta">
+                  @if (file.status === 'modified' && file.size_change !== 0) {
+                    <span class="size-change" [class.positive]="file.size_change > 0" [class.negative]="file.size_change < 0">
+                      {{ formatSizeChange(file.size_change) }}
+                    </span>
+                  }
+                  @if (file.new_file) {
+                    <span class="file-size-info">{{ formatFileSize(file.new_file.file_size) }}</span>
+                  } @else if (file.old_file) {
+                    <span class="file-size-info">{{ formatFileSize(file.old_file.file_size) }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="compare-no-changes">No differences found</div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="compare-empty">
+        <p>Select two versions above and click <strong>Compare</strong> to see what changed between them.</p>
+      </div>
+    }
+
+  } @else {
+    <!-- NORMAL MODE -->
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Parsing timelines...</p>
+      </div>
+    } @else if (hasDiff()) {
+      <!-- Zoom Controls -->
+      <div class="zoom-controls">
+        <button class="zoom-btn" (click)="zoomOut()">-</button>
+        <button class="zoom-btn zoom-label" (click)="resetZoom()">{{ (zoom() * 100) | number:'1.0-0' }}%</button>
+        <button class="zoom-btn" (click)="zoomIn()">+</button>
+      </div>
+
+      <!-- Diff Summary -->
+      <div class="diff-summary">
+        <span class="summary-badge added">+{{ diff()!.summary.added }} added</span>
+        <span class="summary-badge removed">-{{ diff()!.summary.removed }} removed</span>
+        <span class="summary-badge modified">~{{ diff()!.summary.modified }} modified</span>
+        <span class="summary-badge unchanged">{{ diff()!.summary.unchanged }} unchanged</span>
+      </div>
+
+      <!-- Timeline Tracks -->
+      <div class="tracks-container">
+        @for (track of diff()!.tracks; track track.name; let i = $index) {
+          <div class="track-row">
+            <div class="track-header">
+              <span class="track-kind" [class.audio]="track.kind === 'Audio'">
+                {{ getTrackIcon(track.kind) }}
+              </span>
+              <span class="track-name">{{ track.name }}</span>
+            </div>
+            <div class="track-clips">
+              @for (clip of track.clips; track clip.clip_index) {
+                <div
+                  class="clip-block"
+                  [class]="getStatusClass(clip.status)"
+                  [style.width.px]="getClipWidth(clip)"
+                  [style.left.px]="getClipOffset(clip)"
+                  [title]="clip.name + ' (' + clip.status + ')'"
+                >
+                  <div class="clip-label">
+                    @if (getStatusLabel(clip.status)) {
+                      <span class="status-tag">{{ getStatusLabel(clip.status) }}</span>
+                    }
+                    <span class="clip-name">{{ clip.name }}</span>
+                  </div>
+                  <div class="clip-duration">{{ formatDuration(clip) }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (hasDetail()) {
+      <div class="commit-detail">
+        <div class="detail-header">
+          <div class="detail-message">{{ selectedDetail()!.commit.message }}</div>
+          <div class="detail-meta">
+            <span class="detail-time">{{ formatCommitTime(selectedDetail()!.commit.created_at) }}</span>
+            @if (selectedDetail()!.commit.is_milestone) {
+              <span class="detail-milestone-badge">Milestone</span>
+            }
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn-restore" (click)="promptRestore()" [disabled]="restoring()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7a4.5 4.5 0 118.6 1.8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <path d="M2.5 3v4h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Restore This Version
+          </button>
+        </div>
+
+        @if (restoreConfirm()) {
+          <div class="restore-confirm">
+            <div class="restore-warn-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M10 2L1.5 17h17L10 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M10 8v4M10 14v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="restore-warn-text">This will overwrite your current project files with the saved copies from this version. Large media files (over 50 MB) may not have stored copies and cannot be restored.</p>
+            <div class="restore-confirm-actions">
+              <button class="btn-restore-go" (click)="confirmRestore()" [disabled]="restoring()">
+                {{ restoring() ? 'Restoring...' : 'Yes, Restore' }}
+              </button>
+              <button class="btn-cancel" (click)="cancelRestore()">Cancel</button>
+            </div>
+            @if (restoreError()) {
+              <div class="restore-error">{{ restoreError() }}</div>
+            }
+          </div>
+        }
+
+        @if (restoreResult()) {
+          <div class="restore-report" [class.has-skipped]="restoreResult()!.skipped_count > 0">
+            <div class="restore-report-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                @if (restoreResult()!.skipped_count === 0) {
+                  <circle cx="8" cy="8" r="6" stroke="#34d399" stroke-width="1.5"/>
+                  <path d="M5.5 8l2 2 3.5-3.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                } @else {
+                  <circle cx="8" cy="8" r="6" stroke="#fbbf24" stroke-width="1.5"/>
+                  <path d="M8 5v3.5M8 10.5v.5" stroke="#fbbf24" stroke-width="1.5" stroke-linecap="round"/>
+                }
+              </svg>
+              <span>Restored {{ restoreResult()!.restored_count }} of {{ restoreResult()!.total }} files</span>
+              <button class="restore-dismiss" (click)="dismissRestoreResult()">×</button>
+            </div>
+            @if (restoreResult()!.skipped_count > 0) {
+              <div class="restore-skipped">
+                <p class="skipped-label">Could not restore (large files without stored copies):</p>
+                @for (file of restoreResult()!.skipped; track file) {
+                  <div class="skipped-file">{{ file }}</div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <div class="detail-files-header">
+          <span class="files-title">Saved Files</span>
+          <span class="files-count">{{ selectedDetail()!.files.length }} file{{ selectedDetail()!.files.length !== 1 ? 's' : '' }}</span>
+        </div>
+
+        <div class="detail-files">
+          @for (file of selectedDetail()!.files; track file.id) {
+            <div class="file-item">
+              <span class="file-icon" [attr.data-type]="file.file_type.toLowerCase()">{{ getFileIcon(file.file_type) }}</span>
+              <div class="file-info">
+                <div class="file-name">
+                  @if (getFileDir(file.file_path)) {
+                    <span class="file-dir">{{ getFileDir(file.file_path) }}</span>
+                  }
+                  {{ getFileName(file.file_path) }}
+                </div>
+                <div class="file-meta">
+                  <span class="file-size">{{ formatFileSize(file.file_size) }}</span>
+                  <span class="file-type">{{ file.file_type }}</span>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="no-files">No files in this version</div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <rect x="8" y="16" width="48" height="32" rx="4" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4"/>
+            <rect x="14" y="24" width="16" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="34" y="24" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <rect x="14" y="36" width="20" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3>Ghost Timeline</h3>
+        <p>Click a version in the sidebar to view its details</p>
+      </div>
+    }
+  }
+</div>

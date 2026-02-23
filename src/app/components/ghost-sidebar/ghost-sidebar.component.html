@@ -1,0 +1,139 @@
+<div class="ghost-sidebar">
+  <div class="sidebar-header">
+    <h3>History</h3>
+    <div class="branch-controls">
+      <select class="branch-select" (change)="onBranchChange($event)">
+        @for (branch of branches(); track branch.id) {
+          <option [value]="branch.id" [selected]="branch.is_active">{{ branch.name }}</option>
+        }
+      </select>
+      <button class="icon-btn-sm" (click)="toggleNewBranch()" title="New Timeline">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+      @if (branches().length > 1) {
+        <button
+          class="icon-btn-sm delete-branch-btn"
+          (click)="promptDeleteBranch('')"
+          title="Delete a timeline"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 4h8M5.5 4V3a1 1 0 011-1h1a1 1 0 011 1v1M6 6.5v3M8 6.5v3M4 4l.5 7a1 1 0 001 1h3a1 1 0 001-1L10 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      }
+    </div>
+
+    @if (confirmingDelete() !== null) {
+      <div class="delete-confirm">
+        <span class="delete-label">Delete timeline:</span>
+        <select class="branch-select delete-select" #deleteBranchSelect>
+          @for (branch of branches(); track branch.id) {
+            @if (!branch.is_active) {
+              <option [value]="branch.id">{{ branch.name }}</option>
+            }
+          }
+        </select>
+        <div class="delete-actions">
+          <button class="btn-delete" (click)="confirmingDelete.set(deleteBranchSelect.value); confirmDeleteBranch()">Delete</button>
+          <button class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+        </div>
+      </div>
+      @if (branchError()) {
+        <div class="branch-error">{{ branchError() }}</div>
+      }
+    }
+
+    @if (showNewBranch()) {
+      <div class="new-branch-form">
+        <input
+          type="text"
+          placeholder="Timeline name..."
+          [value]="newBranchName()"
+          (input)="newBranchName.set($any($event.target).value)"
+          (keyup.enter)="createBranch()"
+          [disabled]="creatingBranch()"
+        />
+        <button class="btn-create" (click)="createBranch()" [disabled]="creatingBranch()">
+          {{ creatingBranch() ? '...' : 'Create' }}
+        </button>
+      </div>
+      @if (branchError()) {
+        <div class="branch-error">{{ branchError() }}</div>
+      }
+    }
+  </div>
+
+  <div class="commit-list">
+    @for (commit of history(); track commit.id; let i = $index) {
+      <div
+        class="commit-item"
+        [class.selected]="selectedCommit()?.id === commit.id"
+        (click)="onCommitClick(commit)"
+      >
+        <div class="commit-indicator" [class.milestone]="commit.is_milestone">
+          @if (commit.is_milestone) {
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1l1.76 3.57L13 5.24l-3 2.92.71 4.13L7 10.36 3.29 12.3 4 8.16 1 5.24l4.24-.67L7 1z" fill="currentColor"/>
+            </svg>
+          } @else {
+            <div class="dot"></div>
+          }
+        </div>
+        <div class="commit-content">
+          <div class="commit-message">{{ commit.message }}</div>
+          <div class="commit-meta">{{ formatTime(commit.created_at) }}</div>
+        </div>
+        <div class="commit-actions">
+          <button
+            class="commit-action-btn download-btn"
+            (click)="downloadCommit(commit, $event)"
+            title="Download this version"
+          >
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+              <path d="M7 2v7M7 9l-2.5-2.5M7 9l2.5-2.5M3 11h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          @if (i === 0) {
+            <button
+              class="commit-action-btn delete-btn"
+              (click)="promptDeleteCommit(commit.id, $event)"
+              title="Delete this version"
+            >
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+                <path d="M3 4h8M5.5 4V3a1 1 0 011-1h1a1 1 0 011 1v1M6 6.5v3M8 6.5v3M4 4l.5 7a1 1 0 001 1h3a1 1 0 001-1L10 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (confirmingCommitDelete() === commit.id) {
+        <div class="commit-delete-confirm">
+          <span>Delete "{{ commit.message }}"?</span>
+          <div class="delete-actions">
+            <button class="btn-delete" (click)="confirmDeleteCommit()">Delete</button>
+            <button class="btn-cancel" (click)="cancelCommitDelete()">Cancel</button>
+          </div>
+          @if (commitDeleteError()) {
+            <div class="branch-error">{{ commitDeleteError() }}</div>
+          }
+        </div>
+      }
+    } @empty {
+      <div class="empty-state">
+        <p>No versions yet</p>
+        <p class="hint">Save a version to start</p>
+      </div>
+    }
+  </div>
+
+  @if (exportStatus()) {
+    <div class="export-banner" [class.success]="exportSuccess()" [class.error]="!exportSuccess()">
+      <span>{{ exportStatus() }}</span>
+      <button class="export-dismiss" (click)="exportStatus.set('')">&times;</button>
+    </div>
+  }
+</div>

@@ -1,0 +1,157 @@
+@use '../../../styles/variables' as *;
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: $bg-primary;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: $toolbar-height;
+  padding: 0 12px;
+  background: $bg-secondary;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+  -webkit-app-region: drag;
+
+  button, input, select {
+    -webkit-app-region: no-drag;
+  }
+}
+
+.toolbar-left, .toolbar-center, .toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-left {
+  flex: 1;
+}
+
+.toolbar-right {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.project-name {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-md;
+  background: transparent;
+  color: $text-secondary;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-primary;
+  }
+}
+
+.btn-sm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $bg-hover;
+    border-color: $border-light;
+  }
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: $sidebar-width;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  transition: width $transition-normal, opacity $transition-normal;
+  overflow: hidden;
+  border-right: 1px solid $border-color;
+
+  &.collapsed {
+    width: 0;
+    opacity: 0;
+    border-right: none;
+  }
+}
+
+.sidebar-tabs {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid $border-color;
+  background: $bg-secondary;
+}
+
+.sidebar-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: $text-muted;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  transition: all $transition-fast;
+
+  &:hover {
+    color: $text-secondary;
+    background: $bg-tertiary;
+  }
+
+  &.active {
+    color: $text-primary;
+    border-bottom-color: $accent-primary;
+  }
+}
+
+.sidebar-panel {
+  flex: 1;
+  overflow: hidden;
+}
+
+.content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.timeline-view {
+  flex: 1;
+  overflow: auto;
+}
+
+.slider-area {
+  flex-shrink: 0;
+}

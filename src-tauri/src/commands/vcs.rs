@@ -1,0 +1,161 @@
+use std::path::Path;
+use tauri::State;
+use crate::AppState;
+use crate::db::schema::{self, Branch, Commit, FileSnapshot};
+use crate::error::AppError;
+use crate::vcs;
+use crate::vcs::object_store::ObjectStore;
+use crate::vcs::commit::{RestoreReport, ExportReport};
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct CommitDetail {
+    pub commit: Commit,
+    pub files: Vec<FileSnapshot>,
+}
+
+#[tauri::command]
+pub fn create_commit(
+    state: State<AppState>,
+    message: String,
+    is_milestone: bool,
+) -> Result<Commit, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+
+    let editgit_dir = Path::new(&project_path).join(".editgit");
+    let obj_store = ObjectStore::new(&editgit_dir);
+
+    let commit = vcs::commit::create_commit(
+        &db.conn,
+        &project.id,
+        Path::new(&project_path),
+        &message,
+        is_milestone,
+        &obj_store,
+    )?;
+
+    drop(db);
+    if let Err(e) = crate::backup::backup_project(&project.name, &project_path) {
+        log::warn!("Background backup failed: {e}");
+    }
+
+    Ok(commit)
+}
+
+#[tauri::command]
+pub fn get_history(
+    state: State<AppState>,
+    branch_id: String,
+    limit: u32,
+) -> Result<Vec<Commit>, AppError> {
+    let db = state.db.lock();
+    Ok(vcs::history::get_branch_history(&db.conn, &branch_id, limit)?)
+}
+
+#[tauri::command]
+pub fn get_commit_detail(
+    state: State<AppState>,
+    commit_id: String,
+) -> Result<CommitDetail, AppError> {
+    let db = state.db.lock();
+    let (commit, files) = vcs::commit::get_detail(&db.conn, &commit_id)?;
+    Ok(CommitDetail { commit, files })
+}
+
+#[tauri::command]
+pub fn get_branches(
+    state: State<AppState>,
+) -> Result<Vec<Branch>, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    Ok(vcs::branch::get_all(&db.conn, &project.id)?)
+}
+
+#[tauri::command]
+pub fn create_branch(
+    state: State<AppState>,
+    name: String,
+) -> Result<Branch, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    Ok(vcs::branch::create_branch(&db.conn, &project.id, &name)?)
+}
+
+#[tauri::command]
+pub fn delete_branch(
+    state: State<AppState>,
+    branch_id: String,
+) -> Result<(), AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    Ok(vcs::branch::delete_branch(&db.conn, &project.id, &branch_id)?)
+}
+
+#[tauri::command]
+pub fn delete_commit(
+    state: State<AppState>,
+    commit_id: String,
+) -> Result<(), AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    let editgit_dir = Path::new(&project_path).join(".editgit");
+    let obj_store = ObjectStore::new(&editgit_dir);
+    Ok(vcs::commit::delete_commit(&db.conn, &project.id, &commit_id, &obj_store)?)
+}
+
+#[tauri::command]
+pub fn restore_commit(
+    state: State<AppState>,
+    commit_id: String,
+) -> Result<RestoreReport, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let editgit_dir = Path::new(&project_path).join(".editgit");
+    let obj_store = ObjectStore::new(&editgit_dir);
+    Ok(vcs::commit::restore_commit(&db.conn, &commit_id, Path::new(&project_path), &obj_store)?)
+}
+
+#[tauri::command]
+pub fn export_commit(
+    state: State<AppState>,
+    commit_id: String,
+    dest_path: String,
+) -> Result<ExportReport, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let editgit_dir = Path::new(&project_path).join(".editgit");
+    let obj_store = ObjectStore::new(&editgit_dir);
+    Ok(vcs::commit::export_commit(&db.conn, &commit_id, Path::new(&dest_path), &obj_store)?)
+}
+
+#[tauri::command]
+pub fn switch_branch(
+    state: State<AppState>,
+    branch_id: String,
+) -> Result<Branch, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    Ok(vcs::branch::switch_branch(&db.conn, &project.id, &branch_id)?)
+}

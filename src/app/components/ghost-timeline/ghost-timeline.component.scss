@@ -1,0 +1,931 @@
+@use '../../../styles/variables' as *;
+
+.ghost-timeline {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $bg-primary;
+  overflow: hidden;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: $text-muted;
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid $border-color;
+    border-top-color: $accent-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 16px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.zoom-btn {
+  padding: 4px 10px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-family: $font-mono;
+  transition: all $transition-fast;
+
+  &:first-child { border-radius: $radius-sm 0 0 $radius-sm; }
+  &:last-child { border-radius: 0 $radius-sm $radius-sm 0; }
+
+  &.zoom-label {
+    min-width: 56px;
+    text-align: center;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-primary;
+  }
+}
+
+.diff-summary {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 10px;
+  flex-shrink: 0;
+}
+
+.summary-badge {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  font-family: $font-mono;
+  padding: 2px 8px;
+  border-radius: 10px;
+
+  &.added {
+    background: $diff-added-bg;
+    color: $diff-added;
+  }
+
+  &.removed {
+    background: $diff-removed-bg;
+    color: $diff-removed;
+  }
+
+  &.modified {
+    background: $diff-modified-bg;
+    color: $diff-modified;
+  }
+
+  &.unchanged {
+    color: $text-muted;
+    background: rgba($text-muted, 0.1);
+  }
+}
+
+.tracks-container {
+  flex: 1;
+  overflow: auto;
+  padding: 0 16px 16px;
+}
+
+.track-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  min-height: 48px;
+}
+
+.track-header {
+  width: 100px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px 12px 0;
+}
+
+.track-kind {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: $radius-sm;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  background: rgba($accent-primary, 0.15);
+  color: $accent-primary;
+
+  &.audio {
+    background: rgba($success, 0.15);
+    color: $success;
+  }
+}
+
+.track-name {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-clips {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  min-height: 48px;
+  background: $bg-secondary;
+  border-radius: $radius-sm;
+  border: 1px solid $border-color;
+  overflow-x: auto;
+  gap: 2px;
+  padding: 4px;
+}
+
+.clip-block {
+  position: relative;
+  flex-shrink: 0;
+  min-width: 40px;
+  height: 40px;
+  border-radius: $radius-sm;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  cursor: default;
+  transition: opacity $transition-fast;
+
+  &.clip-added {
+    background: $diff-added-bg;
+    border: 1px solid rgba($diff-added, 0.3);
+  }
+
+  &.clip-removed {
+    background: $diff-removed-bg;
+    border: 1px solid rgba($diff-removed, 0.3);
+    opacity: 0.7;
+  }
+
+  &.clip-modified {
+    background: $diff-modified-bg;
+    border: 1px solid rgba($diff-modified, 0.3);
+  }
+
+  &.clip-unchanged {
+    background: rgba($text-muted, 0.06);
+    border: 1px solid rgba($text-muted, 0.12);
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.clip-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.status-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-family: $font-mono;
+  padding: 0 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+
+  .clip-added & {
+    background: rgba($diff-added, 0.2);
+    color: $diff-added;
+  }
+
+  .clip-removed & {
+    background: rgba($diff-removed, 0.2);
+    color: $diff-removed;
+  }
+
+  .clip-modified & {
+    background: rgba($diff-modified, 0.2);
+    color: $diff-modified;
+  }
+}
+
+.clip-name {
+  font-size: $font-size-xs;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clip-duration {
+  font-size: 0.6rem;
+  color: $text-muted;
+  font-family: $font-mono;
+}
+
+.commit-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.detail-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  .detail-message {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-primary;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+
+    .detail-time {
+      font-size: $font-size-xs;
+      color: $text-muted;
+    }
+
+    .detail-milestone-badge {
+      font-size: $font-size-xs;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba($milestone-gold, 0.15);
+      color: $milestone-gold;
+    }
+  }
+}
+
+.detail-files-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  flex-shrink: 0;
+
+  .files-title {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .files-count {
+    font-size: $font-size-xs;
+    color: $text-muted;
+    font-family: $font-mono;
+  }
+}
+
+.detail-files {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: $bg-tertiary;
+  }
+
+  .file-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 700;
+    background: rgba($accent-primary, 0.12);
+    color: $accent-primary;
+    flex-shrink: 0;
+
+    &[data-type='video'] {
+      background: rgba($accent-primary, 0.12);
+      color: $accent-primary;
+    }
+
+    &[data-type='audio'] {
+      background: rgba($success, 0.12);
+      color: $success;
+    }
+
+    &[data-type='image'] {
+      background: rgba($milestone-gold, 0.12);
+      color: $milestone-gold;
+    }
+
+    &[data-type='project'] {
+      background: rgba($accent-secondary, 0.12);
+      color: $accent-secondary;
+    }
+  }
+
+  .file-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .file-name {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    font-weight: 500;
+    line-height: 1.3;
+    word-break: break-all;
+
+    .file-dir {
+      color: $text-muted;
+      font-weight: 400;
+    }
+  }
+
+  .file-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 3px;
+
+    .file-size, .file-type {
+      font-size: $font-size-xs;
+      color: $text-muted;
+      font-family: $font-mono;
+    }
+  }
+}
+
+.no-files {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+// ========== Compare Mode ==========
+
+.compare-panel {
+  padding: 20px 24px;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  .compare-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    h3 {
+      font-size: $font-size-md;
+      font-weight: 600;
+      color: $text-primary;
+    }
+
+    .compare-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: $radius-sm;
+      background: transparent;
+      color: $text-muted;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: $bg-tertiary;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .compare-pickers {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .picker-group {
+    flex: 1;
+
+    .picker-label {
+      display: block;
+      font-size: $font-size-xs;
+      color: $text-muted;
+      font-weight: 500;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .picker-select {
+      width: 100%;
+      padding: 8px 10px;
+      background: $bg-tertiary;
+      border: 1px solid $border-color;
+      border-radius: $radius-sm;
+      color: $text-primary;
+      font-size: $font-size-sm;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+
+      option {
+        background: $bg-tertiary;
+        color: $text-primary;
+      }
+
+      &:focus {
+        border-color: $accent-primary;
+      }
+    }
+  }
+
+  .picker-arrow {
+    flex-shrink: 0;
+    color: $text-muted;
+    padding-bottom: 6px;
+  }
+
+  .compare-run-btn {
+    margin-top: 14px;
+    width: 100%;
+    padding: 10px;
+    background: $accent-primary;
+    border-radius: $radius-sm;
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.1);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  .compare-error {
+    margin-top: 10px;
+    padding: 8px 12px;
+    font-size: $font-size-xs;
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+    border-radius: $radius-sm;
+  }
+}
+
+.compare-results {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.compare-summary {
+  padding: 16px 24px;
+  border-bottom: 1px solid $border-color;
+  flex-shrink: 0;
+
+  .compare-versions-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+
+    svg {
+      color: $text-muted;
+      flex-shrink: 0;
+    }
+  }
+
+  .version-tag {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.old {
+      background: rgba($text-muted, 0.12);
+      color: $text-secondary;
+    }
+
+    &.new {
+      background: rgba($accent-primary, 0.12);
+      color: $accent-primary;
+    }
+  }
+
+  .summary-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    font-family: $font-mono;
+    padding: 2px 8px;
+    border-radius: 10px;
+
+    &-added {
+      background: $diff-added-bg;
+      color: $diff-added;
+    }
+
+    &-removed {
+      background: $diff-removed-bg;
+      color: $diff-removed;
+    }
+
+    &-modified {
+      background: $diff-modified-bg;
+      color: $diff-modified;
+    }
+
+    &-unchanged {
+      color: $text-muted;
+      background: rgba($text-muted, 0.1);
+    }
+  }
+}
+
+.compare-file-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 16px 16px;
+}
+
+.compare-file-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: $radius-md;
+  transition: background $transition-fast;
+  border-left: 3px solid transparent;
+
+  &:hover {
+    background: $bg-tertiary;
+  }
+
+  &.file-added {
+    border-left-color: $diff-added;
+  }
+
+  &.file-removed {
+    border-left-color: $diff-removed;
+    opacity: 0.75;
+  }
+
+  &.file-modified {
+    border-left-color: $diff-modified;
+  }
+
+  &.file-unchanged {
+    opacity: 0.5;
+  }
+
+  .file-status-indicator {
+    flex-shrink: 0;
+  }
+
+  .status-label {
+    display: inline-block;
+    width: 36px;
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: $font-mono;
+    padding: 2px 0;
+    border-radius: 3px;
+
+    &.added {
+      background: $diff-added-bg;
+      color: $diff-added;
+    }
+
+    &.removed {
+      background: $diff-removed-bg;
+      color: $diff-removed;
+    }
+
+    &.modified {
+      background: $diff-modified-bg;
+      color: $diff-modified;
+    }
+
+    &.unchanged {
+      color: $text-muted;
+    }
+  }
+
+  .file-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .compare-file-name {
+    font-size: $font-size-sm;
+    color: $text-primary;
+    font-weight: 500;
+    line-height: 1.3;
+    word-break: break-all;
+
+    .compare-file-dir {
+      color: $text-muted;
+      font-weight: 400;
+    }
+  }
+
+  .compare-file-meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 3px;
+
+    .size-change {
+      font-size: $font-size-xs;
+      font-family: $font-mono;
+      font-weight: 600;
+
+      &.positive {
+        color: $diff-added;
+      }
+
+      &.negative {
+        color: $diff-removed;
+      }
+    }
+
+    .file-size-info {
+      font-size: $font-size-xs;
+      color: $text-muted;
+      font-family: $font-mono;
+    }
+  }
+}
+
+.compare-no-changes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}
+
+.compare-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+
+  p {
+    color: $text-muted;
+    font-size: $font-size-sm;
+    text-align: center;
+    max-width: 300px;
+    line-height: 1.5;
+
+    strong {
+      color: $text-secondary;
+    }
+  }
+}
+
+// Restore UI
+.detail-actions {
+  padding: 12px 24px 0;
+}
+
+.btn-restore {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: $radius-md;
+  background: rgba($accent-primary, 0.12);
+  border: 1px solid rgba($accent-primary, 0.3);
+  color: $accent-primary;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  transition: all $transition-fast;
+  width: 100%;
+  justify-content: center;
+
+  &:hover:not(:disabled) {
+    background: rgba($accent-primary, 0.2);
+    border-color: $accent-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.restore-confirm {
+  margin: 12px 24px;
+  padding: 14px;
+  border-radius: $radius-md;
+  background: rgba($warning, 0.08);
+  border: 1px solid rgba($warning, 0.2);
+
+  .restore-warn-icon {
+    color: $warning;
+    margin-bottom: 8px;
+  }
+
+  .restore-warn-text {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .restore-confirm-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-restore-go {
+    padding: 6px 16px;
+    border-radius: $radius-md;
+    background: $accent-primary;
+    color: #fff;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    transition: all $transition-fast;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.15);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-cancel {
+    padding: 6px 16px;
+    border-radius: $radius-md;
+    background: $bg-tertiary;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: $bg-hover;
+      color: $text-primary;
+    }
+  }
+
+  .restore-error {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: $radius-sm;
+    background: rgba($danger, 0.1);
+    color: $danger;
+    font-size: $font-size-xs;
+  }
+}
+
+.restore-report {
+  margin: 12px 24px;
+  padding: 12px;
+  border-radius: $radius-md;
+  background: rgba($success, 0.08);
+  border: 1px solid rgba($success, 0.2);
+
+  &.has-skipped {
+    background: rgba($warning, 0.08);
+    border-color: rgba($warning, 0.2);
+  }
+
+  .restore-report-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: $font-size-sm;
+    color: $text-primary;
+    font-weight: 500;
+
+    .restore-dismiss {
+      margin-left: auto;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: $radius-sm;
+      background: transparent;
+      color: $text-muted;
+      font-size: 16px;
+      transition: all $transition-fast;
+
+      &:hover {
+        background: $bg-tertiary;
+        color: $text-primary;
+      }
+    }
+  }
+
+  .restore-skipped {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba($warning, 0.15);
+
+    .skipped-label {
+      font-size: $font-size-xs;
+      color: $text-muted;
+      margin-bottom: 4px;
+    }
+
+    .skipped-file {
+      font-size: $font-size-xs;
+      color: $warning;
+      font-family: $font-mono;
+      padding: 2px 0;
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  color: $text-muted;
+
+  .empty-icon {
+    opacity: 0.3;
+  }
+
+  h3 {
+    font-size: $font-size-md;
+    color: $text-secondary;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: $font-size-sm;
+    max-width: 280px;
+    text-align: center;
+    line-height: 1.4;
+  }
+}

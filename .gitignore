@@ -1,0 +1,30 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Angular build output
+dist/
+
+# Rust / Cargo build output
+target/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Cursor
+.cursor/
+
+# Environment
+.env
+.env.*
+
+# OS
+Thumbs.db
+
+# Tauri
+src-tauri/gen/
