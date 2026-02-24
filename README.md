@@ -21,11 +21,65 @@ Supports **OpenTimelineIO (OTIO)** and **Final Cut Pro XML (FCPXML)**. Your data
 
 ---
 
+## Use cases & comparisons
+
+### Turn Around vs traditional video workflows
+
+| Traditional workflow | Turn Around |
+|----------------------|-------------|
+| Duplicate project files (`Project_v2.prproj`, `Project_FINAL.prproj`) | One project directory, many commits; history is first-class |
+| Manual copies or external backups to “save” a state | Commit with a message; restore any version from the app |
+| No way to try a risky edit without touching the main timeline | Branches: experiment, then merge or discard |
+| “Which timeline had the good cut?” | Time-travel slider + timeline diff: see what changed, when |
+| Large media duplicated for every backup | Content-addressable storage: same file = one copy |
+
+### Turn Around vs Git
+
+| Git | Turn Around |
+|-----|-------------|
+| Built for text (diffs, merges) | Built for video: project files, timelines, media |
+| Binary blobs are opaque | Timeline-aware: parses OTIO/FCPXML, shows track/clip-level diffs |
+| No notion of “timeline” or “sequence” | Commits capture project + timeline state; you compare edits, not raw bytes |
+| CLI-first, branch/merge model | Desktop app: slider through history, visual diff, commit when you’re ready |
+| Repo = one working tree | Same idea: one project dir, full history and branches inside the app |
+
+Turn Around is “Git for video” in spirit (commits, branches, history) but designed for how video editors work: big assets, timeline structure, and a need to see what changed without reading source code.
+
+---
+
 ## What it looks like
 
 - **Dashboard** — All your Turn Around projects: open, rename, archive, see stats.
 - **Workspace** — Timeline diff viewer (ghost timeline), history sidebar, commit dialog, branch list.
 - **Compare mode** — Pick two commits and see track- and clip-level changes.
+
+### Screenshots & demo
+
+**Dashboard** — Project list, search, and quick actions (New Project, Open Folder). Filter by All / Active / Archived.
+
+![Dashboard](docs/screenshots/dashboard.png)
+
+**Project card** — Open a project, see path, version count, branch count, disk usage, and last opened. Rename, archive, or delete from the card.
+
+![Project card](docs/screenshots/dashboard-project-card.png)
+
+**Workspace — Ghost Timeline** — After opening a project, the main area shows the Ghost Timeline. Save versions or milestones; the sidebar lists branches and history. “Click a version in the sidebar to view its details.”
+
+![Workspace — Ghost Timeline](docs/screenshots/workspace-ghost-timeline.png)
+
+**Workspace — History** — Branch list and full version history with timestamps. Milestones are starred. Select a version to see it in the Ghost Timeline; use the time-travel slider at the bottom to move through history.
+
+![Workspace — History](docs/screenshots/workspace-history.png)
+
+**Compare versions** — Choose two versions (older vs newer) and run a comparison to see what changed between them.
+
+![Compare versions](docs/screenshots/compare-versions-select.png)
+
+**Compare result** — File-level diff: added, removed, and unchanged files with sizes. Perfect for answering “what did I change between these two versions?”
+
+![Compare result](docs/screenshots/compare-versions-diff.png)
+
+A 30–60 second screen recording (GIF or MP4) of: open project → scrub the time-travel slider → open compare mode is still a great addition for LinkedIn and social.
 
 ---
 
@@ -53,7 +107,7 @@ npm install
 npm run tauri dev
 ```
 
-**First run:** Open the app → “New project” or “Open folder” → choose a directory (or create one). Turn Around initializes a `.editgit` project there. Add your project files and media, then use the workspace to commit, branch, and browse history.
+**First run:** Open the app → “New project” or “Open folder” → choose a directory (or create one). Turn Around initializes its project data there (versions, metadata, and object store live in a hidden folder in that directory). Add your project files and media, then use the workspace to commit, branch, and browse history.
 
 **Build for production:**
 
@@ -62,6 +116,33 @@ npm run tauri build
 ```
 
 Binaries land in `src-tauri/target/release/`.
+
+---
+
+## Releases & packaging
+
+Stable releases (installers and binaries) make it easier for non-developers to try Turn Around without building from source.
+
+**Build installers (per platform):**
+
+```bash
+npm run tauri build
+```
+
+Tauri produces native installers in `src-tauri/target/release/bundle/`:
+
+- **macOS** — `.dmg` and/or `.app`
+- **Windows** — `.msi` and/or `.exe`
+- **Linux** — `.deb`, `.AppImage`, etc. (depending on Tauri bundle config)
+
+**Publishing a release:**
+
+1. Bump `version` in `src-tauri/tauri.conf.json` (and optionally `package.json`).
+2. Run `npm run tauri build` on the target OS (or use CI for multiple platforms).
+3. Upload the artifacts from `src-tauri/target/release/bundle/` to a **GitHub Release** (or similar): tag the release (e.g. `v0.2.0`), attach the installers, add short release notes.
+4. Optionally add a “Releases” or “Download” link in the README that points to the latest GitHub Release.
+
+As the project grows, consider GitHub Actions (or similar) to build macOS, Windows, and Linux installers on every tag and attach them to the release automatically.
 
 ---
 
