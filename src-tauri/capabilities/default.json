@@ -1,6 +1,6 @@
 {
   "identifier": "default",
-  "description": "Default capabilities for EditGit",
+  "description": "Default capabilities for Turn Around",
   "windows": ["main"],
   "permissions": [
     "core:default",

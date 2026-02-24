@@ -12,7 +12,7 @@
           <circle cx="36" cy="29" r="2.8" fill="#fff"/>
           <circle cx="30" cy="18" r="2.8" fill="#fff"/>
         </svg>
-        <span class="brand-name">EditGit</span>
+        <span class="brand-name">Turn Around</span>
       </div>
     </div>
 
@@ -212,7 +212,7 @@
 @if (showProfileDialog()) {
   <div class="dialog-overlay" (click)="showProfileDialog.set(false)">
     <div class="dialog" (click)="$event.stopPropagation()">
-      <h2>{{ profile() ? 'Edit Profile' : 'Welcome to EditGit' }}</h2>
+      <h2>{{ profile() ? 'Edit Profile' : 'Welcome to Turn Around' }}</h2>
       @if (!profile()) {
         <p class="dialog-hint">Set up your profile. Your name will be attached to every version you save.</p>
       }

@@ -72,5 +72,5 @@ pub fn run() {
             commands::timeline::parse_timeline_file,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running EditGit");
+        .expect("error while running Turn Around");
 }

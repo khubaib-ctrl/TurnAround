@@ -28,7 +28,7 @@ pub enum AppError {
     #[error("Project path does not exist")]
     ProjectPathNotExists,
 
-    #[error("Not an EditGit project (no .editgit directory found)")]
+    #[error("Not a Turn Around project (no .editgit directory found)")]
     NotEditGitProject,
 
     #[error("{0}")]
