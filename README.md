@@ -4,6 +4,8 @@
 
 Turn Around is a desktop app that brings a Git-like workflow to video production. Stop juggling `Project_final_v3_really_FINAL.prproj` and guessing which timeline was the good one. Initialize a project, commit when it matters, branch to experiment, and scrub back through every version you’ve ever saved.
 
+**Download:** [Latest release (macOS Apple Silicon)](https://github.com/khubaib-ctrl/TurnAround/releases/latest) — `.dmg` installer.
+
 ---
 
 ## Why this exists
@@ -120,6 +122,8 @@ Binaries land in `src-tauri/target/release/`.
 ---
 
 ## Releases & packaging
+
+**Download the latest build:** [GitHub Releases](https://github.com/khubaib-ctrl/TurnAround/releases/latest) — macOS (Apple Silicon) `.dmg`.
 
 Stable releases (installers and binaries) make it easier for non-developers to try Turn Around without building from source.
 
