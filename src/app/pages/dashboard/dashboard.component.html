@@ -269,6 +269,26 @@
           <button class="btn-secondary-sm" (click)="pickFolder()">Browse</button>
         </div>
       </div>
+      <div class="dialog-field">
+        <label>DaVinci Resolve Project <span class="optional">(optional)</span></label>
+        @if (loadingResolve()) {
+          <div class="resolve-hint">Scanning for Resolve projects...</div>
+        } @else if (resolveProjects().length === 0) {
+          <div class="resolve-hint">No DaVinci Resolve projects found on this system.</div>
+        } @else {
+          <select
+            class="resolve-select"
+            [value]="selectedResolveDb()"
+            (change)="selectedResolveDb.set($any($event.target).value)"
+          >
+            <option value="">None (don't link)</option>
+            @for (rp of resolveProjects(); track rp.db_path) {
+              <option [value]="rp.db_path">{{ rp.name }}</option>
+            }
+          </select>
+        }
+      </div>
+
       @if (newProjectError()) {
         <div class="dialog-error">{{ newProjectError() }}</div>
       }
