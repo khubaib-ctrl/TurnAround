@@ -19,7 +19,9 @@ Developers have Git. Video editors have … duplicate project files and hope. Tu
 - **Smart storage** — Content-addressable dedup so large media doesn’t duplicate. Small and project files are stored in full; big assets are hashed and referenced.
 - **File watcher** — Edits are detected; you get a nudge to commit instead of forgetting.
 
-Supports **OpenTimelineIO (OTIO)** and **Final Cut Pro XML (FCPXML)**. Your data stays on your machine. No cloud lock-in.
+Currently built for **DaVinci Resolve** — Turn Around links directly to your Resolve project library, detects saves in real time, and lets you restore any version straight back into Resolve. Support for **Premiere Pro**, **Final Cut Pro**, and other editing software is coming soon.
+
+Also supports **OpenTimelineIO (OTIO)** and **Final Cut Pro XML (FCPXML)** timeline parsing. Your data stays on your machine. No cloud lock-in.
 
 ---
 
