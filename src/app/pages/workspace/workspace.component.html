@@ -9,6 +9,21 @@
         </svg>
       </button>
       <div class="project-name">{{ project()?.name || 'Turn Around' }}</div>
+      <button
+        class="resolve-link-btn"
+        [class.linked]="linkedResolveName()"
+        (click)="openResolvePicker()"
+        [title]="linkedResolveName() ? 'Linked: ' + linkedResolveName() : 'Link DaVinci Resolve project'"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5.5 8.5l3-3M4 9.5l-1.3 1.3a1.5 1.5 0 002.1 2.1L6.1 11.6M7.9 2.4l1.3-1.3a1.5 1.5 0 012.1 2.1L10 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        @if (linkedResolveName()) {
+          <span class="resolve-name">{{ linkedResolveName() }}</span>
+        } @else {
+          <span class="resolve-name">Link Resolve</span>
+        }
+      </button>
     </div>
 
     <div class="toolbar-center">
@@ -86,5 +101,35 @@
       (committed)="onCommitCreated()"
       (closed)="onCommitDialogClose()"
     />
+  }
+
+  <!-- Resolve Picker Dialog -->
+  @if (showResolvePicker()) {
+    <div class="resolve-overlay" (click)="showResolvePicker.set(false)">
+      <div class="resolve-dialog" (click)="$event.stopPropagation()">
+        <h3>Link DaVinci Resolve Project</h3>
+        <p class="resolve-dialog-hint">Select which Resolve project to track for automatic change detection.</p>
+        @if (loadingResolve()) {
+          <div class="resolve-dialog-hint">Scanning for Resolve projects...</div>
+        } @else if (resolveProjects().length === 0) {
+          <div class="resolve-dialog-hint">No DaVinci Resolve projects found on this system.</div>
+        } @else {
+          <select
+            class="resolve-dialog-select"
+            [value]="selectedResolveDb()"
+            (change)="selectedResolveDb.set($any($event.target).value)"
+          >
+            <option value="">None (don't link)</option>
+            @for (rp of resolveProjects(); track rp.db_path) {
+              <option [value]="rp.db_path">{{ rp.name }}</option>
+            }
+          </select>
+        }
+        <div class="resolve-dialog-actions">
+          <button class="resolve-btn-save" (click)="saveResolveLink()" [disabled]="loadingResolve()">Save</button>
+          <button class="resolve-btn-cancel" (click)="showResolvePicker.set(false)">Cancel</button>
+        </div>
+      </div>
+    </div>
   }
 </div>
