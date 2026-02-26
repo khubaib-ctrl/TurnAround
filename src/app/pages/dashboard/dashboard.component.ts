@@ -284,20 +284,6 @@ export class DashboardComponent implements OnInit {
     this.confirmDeleteId.set(null);
   }
 
-  // ── Open existing project folder ──
-
-  async openExistingFolder() {
-    const selected = await open({ directory: true, multiple: false });
-    if (!selected) return;
-    this.error.set('');
-    try {
-      await this.projectService.openProject(selected as string);
-      this.router.navigate(['/workspace']);
-    } catch (e: unknown) {
-      this.error.set(extractError(e).message);
-    }
-  }
-
   // ── Helpers ──
 
   formatSize(bytes: number): string {
