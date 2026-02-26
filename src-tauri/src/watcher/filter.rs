@@ -1,7 +1,7 @@
 use std::path::Path;
 
 const PROJECT_EXTENSIONS: &[&str] = &[
-    "prproj", "drp", "fcpxml", "otio", "xml", "edl", "aaf", "sesx", "als", "flp", "ptx",
+    "prproj", "drp", "db", "fcpxml", "otio", "xml", "edl", "aaf", "sesx", "als", "flp", "ptx",
 ];
 
 const MEDIA_EXTENSIONS: &[&str] = &[
