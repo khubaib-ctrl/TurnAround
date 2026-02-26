@@ -598,3 +598,33 @@
     border-radius: 3px;
   }
 }
+
+// ── Resolve picker ──
+
+.resolve-select {
+  width: 100%;
+  padding: 8px 12px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  outline: none;
+  cursor: pointer;
+  transition: border-color $transition-fast;
+
+  &:focus {
+    border-color: $accent-primary;
+  }
+
+  option {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+.resolve-hint {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  padding: 8px 0;
+}
