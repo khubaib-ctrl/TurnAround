@@ -8,12 +8,19 @@ export interface FileChangeEvent {
   kind: string;
 }
 
+export interface ResolveProject {
+  name: string;
+  db_path: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class WatcherService {
   private _watching = signal(false);
   private _unlisten: UnlistenFn | null = null;
+  private _linkedResolve = signal<string | null>(null);
 
   readonly watching = this._watching.asReadonly();
+  readonly linkedResolve = this._linkedResolve.asReadonly();
   readonly fileChanged$ = new Subject<FileChangeEvent>();
 
   constructor(private tauri: TauriService) {}
@@ -35,5 +42,25 @@ export class WatcherService {
       this._unlisten();
       this._unlisten = null;
     }
+  }
+
+  async listResolveProjects(): Promise<ResolveProject[]> {
+    return this.tauri.invoke<ResolveProject[]>('list_resolve_projects');
+  }
+
+  async linkResolveProject(dbPath: string): Promise<void> {
+    await this.tauri.invoke('link_resolve_project', { dbPath });
+    this._linkedResolve.set(dbPath);
+  }
+
+  async unlinkResolveProject(): Promise<void> {
+    await this.tauri.invoke('unlink_resolve_project');
+    this._linkedResolve.set(null);
+  }
+
+  async getLinkedResolveProject(): Promise<string | null> {
+    const path = await this.tauri.invoke<string | null>('get_linked_resolve_project');
+    this._linkedResolve.set(path);
+    return path;
   }
 }
