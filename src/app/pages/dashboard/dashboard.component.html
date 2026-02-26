@@ -253,41 +253,60 @@
   <div class="dialog-overlay" (click)="showNewProjectDialog.set(false)">
     <div class="dialog" (click)="$event.stopPropagation()">
       <h2>New Project</h2>
+
       <div class="dialog-field">
-        <label>Project Name</label>
-        <input
-          type="text"
-          placeholder="My Video Project"
-          [value]="newProjectName()"
-          (input)="newProjectName.set($any($event.target).value)"
-        />
-      </div>
-      <div class="dialog-field">
-        <label>Project Folder</label>
-        <div class="folder-row">
-          <span class="path-display">{{ newProjectPath() || 'No folder selected' }}</span>
-          <button class="btn-secondary-sm" (click)="pickFolder()">Browse</button>
-        </div>
-      </div>
-      <div class="dialog-field">
-        <label>DaVinci Resolve Project <span class="optional">(optional)</span></label>
+        <label>DaVinci Resolve Project</label>
         @if (loadingResolve()) {
           <div class="resolve-hint">Scanning for Resolve projects...</div>
         } @else if (resolveProjects().length === 0) {
-          <div class="resolve-hint">No DaVinci Resolve projects found on this system.</div>
+          <div class="resolve-hint">No DaVinci Resolve projects found. Enter a name below to create a standalone project.</div>
         } @else {
           <select
             class="resolve-select"
             [value]="selectedResolveDb()"
-            (change)="selectedResolveDb.set($any($event.target).value)"
+            (change)="onResolveSelect($any($event.target).value)"
           >
-            <option value="">None (don't link)</option>
+            <option value="">Select a Resolve project...</option>
             @for (rp of resolveProjects(); track rp.db_path) {
               <option [value]="rp.db_path">{{ rp.name }}</option>
             }
           </select>
         }
       </div>
+
+      @if (selectedResolveDb()) {
+        <div class="auto-filled-info">
+          <span class="auto-label">Name:</span> {{ newProjectName() }}
+          <span class="auto-sep">|</span>
+          <span class="auto-label">Folder:</span> {{ truncatePath(newProjectPath(), 35) }}
+          <button class="btn-link" (click)="showAdvancedNew.set(!showAdvancedNew())">
+            {{ showAdvancedNew() ? 'Hide' : 'Edit' }}
+          </button>
+        </div>
+      }
+
+      @if (!selectedResolveDb() || showAdvancedNew()) {
+        <div class="dialog-field">
+          <label>Project Name</label>
+          <input
+            type="text"
+            placeholder="My Video Project"
+            [value]="newProjectName()"
+            (input)="onProjectNameChange($any($event.target).value)"
+          />
+        </div>
+        @if (selectedResolveDb() && newProjectPath()) {
+          <div class="dialog-field">
+            <label>Project Folder</label>
+            <div class="folder-row">
+              <span class="path-display">{{ newProjectPath() }}</span>
+              <button class="btn-secondary-sm" (click)="copyPath()" [title]="'Copy path'">
+                {{ copiedPath() ? 'Copied!' : 'Copy' }}
+              </button>
+            </div>
+          </div>
+        }
+      }
 
       @if (newProjectError()) {
         <div class="dialog-error">{{ newProjectError() }}</div>
