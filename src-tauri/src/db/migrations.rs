@@ -50,6 +50,15 @@ const MIGRATIONS: &[&str] = &[
     );
     INSERT OR IGNORE INTO schema_version (version) VALUES (1);
     "#,
+
+    // V2: Per-project config key-value store
+    r#"
+    CREATE TABLE IF NOT EXISTS config (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+    );
+    INSERT OR REPLACE INTO schema_version (version) VALUES (2);
+    "#,
 ];
 
 pub fn run_all(conn: &Connection) -> Result<(), DbError> {
