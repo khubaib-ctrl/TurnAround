@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use crate::db::schema::{self, Commit, FileSnapshot};
 use crate::vcs::object_store::ObjectStore;
@@ -6,7 +7,7 @@ use uuid::Uuid;
 use chrono::Utc;
 
 const PROJECT_EXTENSIONS: &[&str] = &[
-    "prproj", "drp", "fcpxml", "otio", "xml", "edl", "aaf", "sesx", "als", "flp", "ptx",
+    "prproj", "drp", "db", "fcpxml", "otio", "xml", "edl", "aaf", "sesx", "als", "flp", "ptx",
 ];
 
 const MEDIA_EXTENSIONS: &[&str] = &[
@@ -147,6 +148,77 @@ fn scan_dir_recursive(root: &Path, dir: &Path, results: &mut Vec<String>) -> Res
         }
     }
     Ok(())
+}
+
+/// Fast check: compares file size and modification time against the head commit.
+/// Does NOT hash files — designed to run on a timer without blocking.
+pub fn get_changed_files(
+    conn: &Connection,
+    project_id: &str,
+    project_root: &Path,
+) -> Result<Vec<String>, super::VcsError> {
+    let branch = schema::get_active_branch(conn, project_id)?
+        .ok_or(super::VcsError::NoActiveBranch)?;
+
+    let current = scan_tracked_files(project_root)?;
+    let head_id = match &branch.head_commit_id {
+        None => return Ok(current),
+        Some(id) => id.clone(),
+    };
+
+    let commit = schema::get_commit(conn, &head_id)?
+        .ok_or_else(|| super::VcsError::CommitNotFound(head_id.clone()))?;
+    let commit_time = chrono::DateTime::parse_from_rfc3339(&commit.created_at)
+        .map(|dt| dt.timestamp())
+        .unwrap_or(0);
+
+    let snapshots = schema::get_snapshots_for_commit(conn, &head_id)?;
+    let last_state: HashMap<String, i64> = snapshots
+        .into_iter()
+        .map(|s| (s.file_path, s.file_size))
+        .collect();
+
+    let current_set: HashSet<_> = current.iter().cloned().collect();
+    let mut changed: Vec<String> = Vec::new();
+
+    for path in &current {
+        let abs = project_root.join(path);
+        let meta = match std::fs::metadata(&abs) {
+            Ok(m) => m,
+            Err(_) => continue,
+        };
+
+        match last_state.get(path) {
+            None => {
+                changed.push(path.clone());
+            }
+            Some(&last_size) => {
+                let current_size = meta.len() as i64;
+                if current_size != last_size {
+                    changed.push(path.clone());
+                    continue;
+                }
+
+                let mtime = meta.modified()
+                    .ok()
+                    .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                    .map(|d| d.as_secs() as i64)
+                    .unwrap_or(0);
+
+                if mtime > commit_time {
+                    changed.push(path.clone());
+                }
+            }
+        }
+    }
+
+    for path in last_state.keys() {
+        if !current_set.contains(path) {
+            changed.push(path.clone());
+        }
+    }
+
+    Ok(changed)
 }
 
 pub fn delete_commit(
