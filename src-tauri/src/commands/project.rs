@@ -34,9 +34,7 @@ pub fn init_project(
     name: String,
 ) -> Result<ProjectInfo, AppError> {
     let project_path = Path::new(&path);
-    if !project_path.exists() {
-        return Err(AppError::ProjectPathNotExists);
-    }
+    std::fs::create_dir_all(&project_path)?;
 
     let editgit_dir = project_path.join(".editgit");
     std::fs::create_dir_all(&editgit_dir)?;
