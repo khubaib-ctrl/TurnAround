@@ -5,14 +5,14 @@ use serde::{Serialize, Deserialize};
 fn backup_root() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join(".editgit")
+        .join(".turnaround")
         .join("backups")
 }
 
 fn registry_path() -> PathBuf {
     dirs::home_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join(".editgit")
+        .join(".turnaround")
         .join("registry.json")
 }
 
@@ -46,11 +46,11 @@ fn save_registry(entries: &[ProjectEntry]) -> Result<(), String> {
 }
 
 pub fn backup_project(project_name: &str, project_path: &str) -> Result<ProjectEntry, String> {
-    let editgit_dir = Path::new(project_path).join(".editgit");
-    let db_path = editgit_dir.join("editgit.db");
+    let turnaround_dir = Path::new(project_path).join(".turnaround");
+    let db_path = turnaround_dir.join("editgit.db");
 
     if !db_path.exists() {
-        return Err("No .editgit database found to back up".to_string());
+        return Err("No .turnaround database found to back up".to_string());
     }
 
     let safe_name = project_path
@@ -64,7 +64,7 @@ pub fn backup_project(project_name: &str, project_path: &str) -> Result<ProjectE
     let dest_db = dest_dir.join("editgit.db");
     fs::copy(&db_path, &dest_db).map_err(|e| format!("Failed to copy database: {e}"))?;
 
-    let objects_dir = editgit_dir.join("objects");
+    let objects_dir = turnaround_dir.join("objects");
     let dest_objects = dest_dir.join("objects");
     if objects_dir.exists() {
         copy_dir_recursive(&objects_dir, &dest_objects)
@@ -99,17 +99,17 @@ pub fn recover_project(original_path: &str, target_path: &str) -> Result<(), Str
     }
 
     let target = Path::new(target_path);
-    let editgit_dir = target.join(".editgit");
-    fs::create_dir_all(&editgit_dir).map_err(|e| format!("{e}"))?;
+    let turnaround_dir = target.join(".turnaround");
+    fs::create_dir_all(&turnaround_dir).map_err(|e| format!("{e}"))?;
 
     let src_db = backup_dir.join("editgit.db");
     if src_db.exists() {
-        fs::copy(&src_db, editgit_dir.join("editgit.db")).map_err(|e| format!("{e}"))?;
+        fs::copy(&src_db, turnaround_dir.join("editgit.db")).map_err(|e| format!("{e}"))?;
     }
 
     let src_objects = backup_dir.join("objects");
     if src_objects.exists() {
-        let dest_objects = editgit_dir.join("objects");
+        let dest_objects = turnaround_dir.join("objects");
         copy_dir_recursive(&src_objects, &dest_objects)
             .map_err(|e| format!("Failed to restore objects: {e}"))?;
     }

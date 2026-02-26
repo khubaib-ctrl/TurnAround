@@ -305,5 +305,5 @@ impl Registry {
 
 pub fn default_registry_dir() -> PathBuf {
     let base = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    base.join("com.editgit.desktop")
+    base.join("com.turnaround.desktop")
 }

@@ -1,13 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "identifier": "com.editgit.desktop",
+  "identifier": "com.turnaround.desktop",
   "productName": "Turn Around",
   "version": "0.1.0",
   "build": {
     "beforeDevCommand": "ng serve",
     "devUrl": "http://localhost:4200",
     "beforeBuildCommand": "ng build",
-    "frontendDist": "../dist/editgit/browser"
+    "frontendDist": "../dist/turnaround/browser"
   },
   "app": {
     "windows": [

@@ -16,8 +16,8 @@ pub fn get_timeline_diff(
         .ok_or(AppError::NoActiveProject)?;
 
     let db = state.db.lock();
-    let editgit_dir = Path::new(&project_path).join(".editgit");
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let turnaround_dir = Path::new(&project_path).join(".turnaround");
+    let obj_store = ObjectStore::new(&turnaround_dir);
 
     let snapshots_a = schema::get_snapshots_for_commit(&db.conn, &commit_a)?;
     let snapshots_b = schema::get_snapshots_for_commit(&db.conn, &commit_b)?;

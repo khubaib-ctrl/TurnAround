@@ -94,10 +94,10 @@ pub fn delete_project_from_registry(
     let entry = reg.delete_project(&project_id)?;
 
     if delete_data {
-        let editgit_dir = Path::new(&entry.root_path).join(".editgit");
-        if editgit_dir.exists() {
-            if let Err(e) = std::fs::remove_dir_all(&editgit_dir) {
-                log::warn!("Failed to remove .editgit directory during deletion: {e}");
+        let turnaround_dir = Path::new(&entry.root_path).join(".turnaround");
+        if turnaround_dir.exists() {
+            if let Err(e) = std::fs::remove_dir_all(&turnaround_dir) {
+                log::warn!("Failed to remove .turnaround directory during deletion: {e}");
             }
         }
     }
@@ -113,8 +113,8 @@ pub fn get_project_stats_live(
     let reg = state.registry.lock();
     let entry = reg.get_project(&project_id)?;
 
-    let editgit_dir = Path::new(&entry.root_path).join(".editgit");
-    let db_path = editgit_dir.join("editgit.db");
+    let turnaround_dir = Path::new(&entry.root_path).join(".turnaround");
+    let db_path = turnaround_dir.join("editgit.db");
 
     if !db_path.exists() {
         return Ok(ProjectStats {
@@ -132,7 +132,7 @@ pub fn get_project_stats_live(
     let branch_count: i64 = conn
         .query_row("SELECT COUNT(*) FROM branches", [], |row| row.get(0))?;
 
-    let disk_usage_bytes = dir_size(&editgit_dir);
+    let disk_usage_bytes = dir_size(&turnaround_dir);
 
     let stats = ProjectStats {
         commit_count,

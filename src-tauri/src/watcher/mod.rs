@@ -5,7 +5,7 @@ use notify::{RecommendedWatcher, RecursiveMode, Watcher, Config};
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter};
 use serde::Serialize;
 
 #[derive(Debug, Serialize, Clone)]

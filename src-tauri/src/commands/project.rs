@@ -36,13 +36,13 @@ pub fn init_project(
     let project_path = Path::new(&path);
     std::fs::create_dir_all(&project_path)?;
 
-    let editgit_dir = project_path.join(".editgit");
-    std::fs::create_dir_all(&editgit_dir)?;
+    let turnaround_dir = project_path.join(".turnaround");
+    std::fs::create_dir_all(&turnaround_dir)?;
 
-    let db_path = editgit_dir.join("editgit.db");
+    let db_path = turnaround_dir.join("editgit.db");
     let db = Database::new(&db_path)?;
 
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let obj_store = ObjectStore::new(&turnaround_dir);
     obj_store.init()?;
 
     if let Some(existing) = schema::get_project_by_path(&db.conn, &path)? {
@@ -138,8 +138,8 @@ pub fn open_project(
     path: String,
 ) -> Result<ProjectInfo, AppError> {
     let project_path = Path::new(&path);
-    let editgit_dir = project_path.join(".editgit");
-    let db_path = editgit_dir.join("editgit.db");
+    let turnaround_dir = project_path.join(".turnaround");
+    let db_path = turnaround_dir.join("editgit.db");
 
     if !db_path.exists() {
         return Err(AppError::NotEditGitProject);
@@ -270,8 +270,8 @@ pub fn recover_project_from_backup(
     crate::backup::recover_project(&original_path, &target_path)
         .map_err(AppError::Backup)?;
 
-    let editgit_dir = Path::new(&target_path).join(".editgit");
-    let db_path = editgit_dir.join("editgit.db");
+    let turnaround_dir = Path::new(&target_path).join(".turnaround");
+    let db_path = turnaround_dir.join("editgit.db");
     let db = Database::new(&db_path)?;
 
     let project = {
