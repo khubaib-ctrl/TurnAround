@@ -557,6 +557,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.path-placeholder {
+    font-style: italic;
+    font-family: inherit;
+    opacity: 0.6;
+  }
 }
 
 .dialog-error {

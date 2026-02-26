@@ -6,8 +6,7 @@ import { ProjectService } from '../../services/project.service';
 import { WatcherService, ResolveProject } from '../../services/watcher.service';
 import { ProjectEntry, UserProfile } from '../../models/project.model';
 import { extractError } from '../../models/error.model';
-import { open } from '@tauri-apps/plugin-dialog';
-import { homeDir } from '@tauri-apps/api/path';
+import { appDataDir } from '@tauri-apps/api/path';
 
 type FilterTab = 'all' | 'active' | 'archived';
 type SortMode = 'recent' | 'name' | 'size' | 'commits';
@@ -124,7 +123,7 @@ export class DashboardComponent implements OnInit {
 
   // ── New Project ──
 
-  private homeDirPath = '';
+  private basePath = '';
   showAdvancedNew = signal(false);
 
   async openNewProjectDialog() {
@@ -136,11 +135,11 @@ export class DashboardComponent implements OnInit {
     this.showNewProjectDialog.set(true);
     this.loadingResolve.set(true);
     try {
-      const [projects, home] = await Promise.all([
+      const [projects, base] = await Promise.all([
         this.watcherService.listResolveProjects(),
-        this.homeDirPath ? Promise.resolve(this.homeDirPath) : homeDir(),
+        this.basePath ? Promise.resolve(this.basePath) : appDataDir(),
       ]);
-      this.homeDirPath = home;
+      this.basePath = base;
       this.resolveProjects.set(projects);
     } catch {
       this.resolveProjects.set([]);
@@ -155,32 +154,14 @@ export class DashboardComponent implements OnInit {
     const rp = this.resolveProjects().find((p) => p.db_path === dbPath);
     if (rp) {
       this.newProjectName.set(rp.name);
-      const base = this.homeDirPath
-        ? `${this.homeDirPath}Documents/Turn Around`
-        : '/tmp/Turn Around';
-      this.newProjectPath.set(`${base}/${rp.name}`);
-    }
-  }
-
-  async pickFolder() {
-    const selected = await open({ directory: true, multiple: false });
-    if (selected) {
-      this.newProjectPath.set(selected as string);
-      if (!this.newProjectName()) {
-        const parts = (selected as string).split('/');
-        this.newProjectName.set(parts[parts.length - 1] || 'Untitled');
-      }
-      this.autoMatchResolve();
+      this.newProjectPath.set(`${this.basePath}projects/${rp.name}`);
     }
   }
 
   onProjectNameChange(name: string) {
     this.newProjectName.set(name);
     this.autoMatchResolve();
-    const base = this.homeDirPath
-      ? `${this.homeDirPath}Documents/Turn Around`
-      : '/tmp/Turn Around';
-    this.newProjectPath.set(`${base}/${name.trim()}`);
+    this.newProjectPath.set(`${this.basePath}projects/${name.trim()}`);
   }
 
   private autoMatchResolve() {
