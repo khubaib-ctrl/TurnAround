@@ -155,3 +155,144 @@
 .slider-area {
   flex-shrink: 0;
 }
+
+// ── Resolve link button ──
+
+.resolve-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-muted;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+  max-width: 180px;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-secondary;
+    border-color: $border-light;
+  }
+
+  &.linked {
+    border-color: rgba($success, 0.3);
+    color: $success;
+
+    &:hover {
+      background: rgba($success, 0.08);
+    }
+  }
+}
+
+.resolve-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ── Resolve picker dialog ──
+
+.resolve-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.resolve-dialog {
+  background: $bg-secondary;
+  border: 1px solid $border-light;
+  border-radius: $radius-xl;
+  padding: 24px;
+  width: 380px;
+  max-width: 90vw;
+  box-shadow: $shadow-lg;
+
+  h3 {
+    font-size: $font-size-md;
+    margin: 0 0 4px;
+    color: $text-primary;
+  }
+}
+
+.resolve-dialog-hint {
+  font-size: $font-size-xs;
+  color: $text-muted;
+  margin: 0 0 14px;
+  line-height: 1.5;
+}
+
+.resolve-dialog-select {
+  width: 100%;
+  padding: 8px 12px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-primary;
+  font-size: $font-size-sm;
+  outline: none;
+  cursor: pointer;
+  transition: border-color $transition-fast;
+
+  &:focus {
+    border-color: $accent-primary;
+  }
+
+  option {
+    background: $bg-secondary;
+    color: $text-primary;
+  }
+}
+
+.resolve-dialog-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.resolve-btn-save {
+  padding: 6px 16px;
+  background: $accent-primary;
+  border: none;
+  border-radius: $radius-md;
+  color: #fff;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.resolve-btn-cancel {
+  padding: 6px 16px;
+  background: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $bg-hover;
+    color: $text-primary;
+  }
+}
