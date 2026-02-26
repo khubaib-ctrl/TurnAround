@@ -275,3 +275,28 @@ pub fn delete_object(conn: &Connection, hash: &str) -> Result<(), DbError> {
     conn.execute("DELETE FROM objects WHERE hash = ?1", params![hash])?;
     Ok(())
 }
+
+// ── Config key-value store ──
+
+pub fn get_config(conn: &Connection, key: &str) -> Result<Option<String>, DbError> {
+    let mut stmt = conn.prepare("SELECT value FROM config WHERE key = ?1")?;
+    let mut rows = stmt.query(params![key])?;
+    if let Some(row) = rows.next()? {
+        Ok(Some(row.get(0)?))
+    } else {
+        Ok(None)
+    }
+}
+
+pub fn set_config(conn: &Connection, key: &str, value: &str) -> Result<(), DbError> {
+    conn.execute(
+        "INSERT OR REPLACE INTO config (key, value) VALUES (?1, ?2)",
+        params![key, value],
+    )?;
+    Ok(())
+}
+
+pub fn delete_config(conn: &Connection, key: &str) -> Result<(), DbError> {
+    conn.execute("DELETE FROM config WHERE key = ?1", params![key])?;
+    Ok(())
+}
