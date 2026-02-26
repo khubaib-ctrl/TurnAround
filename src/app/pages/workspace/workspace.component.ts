@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { GhostSidebarComponent } from '../../components/ghost-sidebar/ghost-sidebar.component';
 import { GhostTimelineComponent } from '../../components/ghost-timeline/ghost-timeline.component';
@@ -9,7 +10,7 @@ import { MilestoneButtonComponent } from '../../components/milestone-button/mile
 import { FileTreeComponent } from '../../components/file-tree/file-tree.component';
 import { ProjectService } from '../../services/project.service';
 import { VcsService } from '../../services/vcs.service';
-import { WatcherService, FileChangeEvent } from '../../services/watcher.service';
+import { WatcherService, FileChangeEvent, ResolveProject } from '../../services/watcher.service';
 import { TimelineService } from '../../services/timeline.service';
 import { extractError } from '../../models/error.model';
 
@@ -17,6 +18,7 @@ import { extractError } from '../../models/error.model';
   selector: 'app-workspace',
   standalone: true,
   imports: [
+    FormsModule,
     GhostSidebarComponent,
     GhostTimelineComponent,
     TimeTravelSliderComponent,
@@ -40,7 +42,17 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
   sidebarCollapsed = signal(false);
   sidebarTab = signal<'history' | 'files'>('history');
 
+  showResolvePicker = signal(false);
+  resolveProjects = signal<ResolveProject[]>([]);
+  selectedResolveDb = signal('');
+  linkedResolveName = signal<string | null>(null);
+  loadingResolve = signal(false);
+
   private watcherSub?: Subscription;
+  private changeCheckInterval?: ReturnType<typeof setInterval>;
+  private lastDismissedAt = 0;
+  private readonly CHANGE_CHECK_MS = 30000;
+  private readonly DISMISS_COOLDOWN_MS = 30000;
 
   readonly project = this.projectService.project;
   readonly history = this.vcsService.history;
@@ -57,6 +69,8 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     await this.vcsService.getBranches();
     await this.vcsService.refreshHistory();
 
+    await this.loadLinkedResolveName();
+
     try {
       await this.watcherService.startWatching();
     } catch (e: unknown) {
@@ -72,15 +86,44 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       });
       this.showCommitDialog.set(true);
     });
+
+    this.changeCheckInterval = setInterval(() => this.checkForChangesAndShowDialog(), this.CHANGE_CHECK_MS);
   }
 
   ngOnDestroy() {
     this.watcherSub?.unsubscribe();
+    if (this.changeCheckInterval) clearInterval(this.changeCheckInterval);
     this.watcherService.stopWatching();
   }
 
-  openCommitDialog(isMilestone = false) {
+  private async checkForChangesAndShowDialog() {
+    if (this.showCommitDialog()) return;
+    if (Date.now() - this.lastDismissedAt < this.DISMISS_COOLDOWN_MS) return;
+    try {
+      const files = await this.vcsService.getChangedFiles();
+      if (files.length > 0) {
+        this.changedFiles.set(files);
+        this.showCommitDialog.set(true);
+        await this.vcsService.focusWindow();
+      }
+    } catch {
+      // ignore (e.g. no project)
+    }
+  }
+
+  async openCommitDialog(isMilestone = false) {
     this.commitDialogMilestone.set(isMilestone);
+    try {
+      const fromBackend = await this.vcsService.getChangedFiles();
+      if (fromBackend.length > 0) {
+        this.changedFiles.update((existing) => {
+          const combined = new Set([...existing, ...fromBackend]);
+          return [...combined];
+        });
+      }
+    } catch (e: unknown) {
+      console.warn('Could not refresh changed files:', extractError(e).message);
+    }
     this.showCommitDialog.set(true);
   }
 
@@ -92,6 +135,7 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   onCommitDialogClose() {
     this.showCommitDialog.set(false);
+    this.lastDismissedAt = Date.now();
   }
 
   toggleSidebar() {
@@ -100,6 +144,54 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
 
   enterCompareMode() {
     this.vcsService.enterCompareMode();
+  }
+
+  async openResolvePicker() {
+    this.showResolvePicker.set(true);
+    this.loadingResolve.set(true);
+    try {
+      const projects = await this.watcherService.listResolveProjects();
+      this.resolveProjects.set(projects);
+      const linked = await this.watcherService.getLinkedResolveProject();
+      this.selectedResolveDb.set(linked || '');
+    } catch {
+      this.resolveProjects.set([]);
+    } finally {
+      this.loadingResolve.set(false);
+    }
+  }
+
+  async saveResolveLink() {
+    const dbPath = this.selectedResolveDb();
+    try {
+      if (dbPath) {
+        await this.watcherService.linkResolveProject(dbPath);
+      } else {
+        await this.watcherService.unlinkResolveProject();
+      }
+      await this.loadLinkedResolveName();
+      this.showResolvePicker.set(false);
+
+      await this.watcherService.stopWatching();
+      await this.watcherService.startWatching();
+    } catch (e: unknown) {
+      console.warn('Failed to update Resolve link:', extractError(e).message);
+    }
+  }
+
+  private async loadLinkedResolveName() {
+    try {
+      const linked = await this.watcherService.getLinkedResolveProject();
+      if (linked) {
+        const parts = linked.split('/');
+        const projectFolder = parts[parts.length - 2] || 'Resolve Project';
+        this.linkedResolveName.set(projectFolder);
+      } else {
+        this.linkedResolveName.set(null);
+      }
+    } catch {
+      this.linkedResolveName.set(null);
+    }
   }
 
   async onBackToSetup() {
