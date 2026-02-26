@@ -2,7 +2,8 @@
 node_modules/
 npm-debug.log*
 
-# Angular build output
+# Angular
+.angular/cache/
 dist/
 
 # Rust / Cargo build output
@@ -27,4 +28,5 @@ target/
 Thumbs.db
 
 # Tauri
+.tauri/
 src-tauri/gen/
