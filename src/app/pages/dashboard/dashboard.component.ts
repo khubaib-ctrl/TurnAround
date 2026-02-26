@@ -7,6 +7,7 @@ import { WatcherService, ResolveProject } from '../../services/watcher.service';
 import { ProjectEntry, UserProfile } from '../../models/project.model';
 import { extractError } from '../../models/error.model';
 import { open } from '@tauri-apps/plugin-dialog';
+import { homeDir } from '@tauri-apps/api/path';
 
 type FilterTab = 'all' | 'active' | 'archived';
 type SortMode = 'recent' | 'name' | 'size' | 'commits';
@@ -42,6 +43,7 @@ export class DashboardComponent implements OnInit {
   resolveProjects = signal<ResolveProject[]>([]);
   selectedResolveDb = signal('');
   loadingResolve = signal(false);
+  copiedPath = signal(false);
 
   renamingProject = signal<string | null>(null);
   renameValue = signal('');
@@ -122,20 +124,41 @@ export class DashboardComponent implements OnInit {
 
   // ── New Project ──
 
+  private homeDirPath = '';
+  showAdvancedNew = signal(false);
+
   async openNewProjectDialog() {
     this.newProjectName.set('');
     this.newProjectPath.set('');
     this.newProjectError.set('');
     this.selectedResolveDb.set('');
+    this.showAdvancedNew.set(false);
     this.showNewProjectDialog.set(true);
     this.loadingResolve.set(true);
     try {
-      const projects = await this.watcherService.listResolveProjects();
+      const [projects, home] = await Promise.all([
+        this.watcherService.listResolveProjects(),
+        this.homeDirPath ? Promise.resolve(this.homeDirPath) : homeDir(),
+      ]);
+      this.homeDirPath = home;
       this.resolveProjects.set(projects);
     } catch {
       this.resolveProjects.set([]);
     } finally {
       this.loadingResolve.set(false);
+    }
+  }
+
+  async onResolveSelect(dbPath: string) {
+    this.selectedResolveDb.set(dbPath);
+    if (!dbPath) return;
+    const rp = this.resolveProjects().find((p) => p.db_path === dbPath);
+    if (rp) {
+      this.newProjectName.set(rp.name);
+      const base = this.homeDirPath
+        ? `${this.homeDirPath}Documents/Turn Around`
+        : '/tmp/Turn Around';
+      this.newProjectPath.set(`${base}/${rp.name}`);
     }
   }
 
@@ -147,7 +170,34 @@ export class DashboardComponent implements OnInit {
         const parts = (selected as string).split('/');
         this.newProjectName.set(parts[parts.length - 1] || 'Untitled');
       }
+      this.autoMatchResolve();
     }
+  }
+
+  onProjectNameChange(name: string) {
+    this.newProjectName.set(name);
+    this.autoMatchResolve();
+    const base = this.homeDirPath
+      ? `${this.homeDirPath}Documents/Turn Around`
+      : '/tmp/Turn Around';
+    this.newProjectPath.set(`${base}/${name.trim()}`);
+  }
+
+  private autoMatchResolve() {
+    const name = this.newProjectName().trim().toLowerCase();
+    if (!name || this.resolveProjects().length === 0) return;
+    const match = this.resolveProjects().find(
+      (rp) => rp.name.toLowerCase() === name,
+    );
+    if (match) {
+      this.selectedResolveDb.set(match.db_path);
+    }
+  }
+
+  copyPath() {
+    navigator.clipboard.writeText(this.newProjectPath());
+    this.copiedPath.set(true);
+    setTimeout(() => this.copiedPath.set(false), 2000);
   }
 
   async createProject() {
