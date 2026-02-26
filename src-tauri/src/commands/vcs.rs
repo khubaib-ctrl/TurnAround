@@ -27,8 +27,8 @@ pub fn create_commit(
     let project = schema::get_project_by_path(&db.conn, &project_path)?
         .ok_or(AppError::ProjectNotFound)?;
 
-    let editgit_dir = Path::new(&project_path).join(".editgit");
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let turnaround_dir = Path::new(&project_path).join(".turnaround");
+    let obj_store = ObjectStore::new(&turnaround_dir);
 
     let commit = vcs::commit::create_commit(
         &db.conn,
@@ -115,8 +115,8 @@ pub fn delete_commit(
     let db = state.db.lock();
     let project = schema::get_project_by_path(&db.conn, &project_path)?
         .ok_or(AppError::ProjectNotFound)?;
-    let editgit_dir = Path::new(&project_path).join(".editgit");
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let turnaround_dir = Path::new(&project_path).join(".turnaround");
+    let obj_store = ObjectStore::new(&turnaround_dir);
     Ok(vcs::commit::delete_commit(&db.conn, &project.id, &commit_id, &obj_store)?)
 }
 
@@ -128,8 +128,8 @@ pub fn restore_commit(
     let project_path = state.active_project_path.lock().clone()
         .ok_or(AppError::NoActiveProject)?;
     let db = state.db.lock();
-    let editgit_dir = Path::new(&project_path).join(".editgit");
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let turnaround_dir = Path::new(&project_path).join(".turnaround");
+    let obj_store = ObjectStore::new(&turnaround_dir);
     let report = vcs::commit::restore_commit(&db.conn, &commit_id, Path::new(&project_path), &obj_store)?;
 
     let restored_resolve_db = Path::new(&project_path).join("ResolveProject.db");
@@ -160,8 +160,8 @@ pub fn export_commit(
     let project_path = state.active_project_path.lock().clone()
         .ok_or(AppError::NoActiveProject)?;
     let db = state.db.lock();
-    let editgit_dir = Path::new(&project_path).join(".editgit");
-    let obj_store = ObjectStore::new(&editgit_dir);
+    let turnaround_dir = Path::new(&project_path).join(".turnaround");
+    let obj_store = ObjectStore::new(&turnaround_dir);
     Ok(vcs::commit::export_commit(&db.conn, &commit_id, Path::new(&dest_path), &obj_store)?)
 }
 

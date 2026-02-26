@@ -6,7 +6,7 @@ import { ProjectService } from '../../services/project.service';
 import { WatcherService, ResolveProject } from '../../services/watcher.service';
 import { ProjectEntry, UserProfile } from '../../models/project.model';
 import { extractError } from '../../models/error.model';
-import { open } from '@tauri-apps/plugin-dialog';
+import { appDataDir } from '@tauri-apps/api/path';
 
 type FilterTab = 'all' | 'active' | 'archived';
 type SortMode = 'recent' | 'name' | 'size' | 'commits';
@@ -42,6 +42,7 @@ export class DashboardComponent implements OnInit {
   resolveProjects = signal<ResolveProject[]>([]);
   selectedResolveDb = signal('');
   loadingResolve = signal(false);
+  copiedPath = signal(false);
 
   renamingProject = signal<string | null>(null);
   renameValue = signal('');
@@ -122,15 +123,23 @@ export class DashboardComponent implements OnInit {
 
   // ── New Project ──
 
+  private basePath = '';
+  showAdvancedNew = signal(false);
+
   async openNewProjectDialog() {
     this.newProjectName.set('');
     this.newProjectPath.set('');
     this.newProjectError.set('');
     this.selectedResolveDb.set('');
+    this.showAdvancedNew.set(false);
     this.showNewProjectDialog.set(true);
     this.loadingResolve.set(true);
     try {
-      const projects = await this.watcherService.listResolveProjects();
+      const [projects, base] = await Promise.all([
+        this.watcherService.listResolveProjects(),
+        this.basePath ? Promise.resolve(this.basePath) : appDataDir(),
+      ]);
+      this.basePath = base;
       this.resolveProjects.set(projects);
     } catch {
       this.resolveProjects.set([]);
@@ -139,15 +148,37 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  async pickFolder() {
-    const selected = await open({ directory: true, multiple: false });
-    if (selected) {
-      this.newProjectPath.set(selected as string);
-      if (!this.newProjectName()) {
-        const parts = (selected as string).split('/');
-        this.newProjectName.set(parts[parts.length - 1] || 'Untitled');
-      }
+  async onResolveSelect(dbPath: string) {
+    this.selectedResolveDb.set(dbPath);
+    if (!dbPath) return;
+    const rp = this.resolveProjects().find((p) => p.db_path === dbPath);
+    if (rp) {
+      this.newProjectName.set(rp.name);
+      this.newProjectPath.set(`${this.basePath}projects/${rp.name}`);
     }
+  }
+
+  onProjectNameChange(name: string) {
+    this.newProjectName.set(name);
+    this.autoMatchResolve();
+    this.newProjectPath.set(`${this.basePath}projects/${name.trim()}`);
+  }
+
+  private autoMatchResolve() {
+    const name = this.newProjectName().trim().toLowerCase();
+    if (!name || this.resolveProjects().length === 0) return;
+    const match = this.resolveProjects().find(
+      (rp) => rp.name.toLowerCase() === name,
+    );
+    if (match) {
+      this.selectedResolveDb.set(match.db_path);
+    }
+  }
+
+  copyPath() {
+    navigator.clipboard.writeText(this.newProjectPath());
+    this.copiedPath.set(true);
+    setTimeout(() => this.copiedPath.set(false), 2000);
   }
 
   async createProject() {
@@ -232,20 +263,6 @@ export class DashboardComponent implements OnInit {
 
   cancelDelete() {
     this.confirmDeleteId.set(null);
-  }
-
-  // ── Open existing project folder ──
-
-  async openExistingFolder() {
-    const selected = await open({ directory: true, multiple: false });
-    if (!selected) return;
-    this.error.set('');
-    try {
-      await this.projectService.openProject(selected as string);
-      this.router.navigate(['/workspace']);
-    } catch (e: unknown) {
-      this.error.set(extractError(e).message);
-    }
   }
 
   // ── Helpers ──

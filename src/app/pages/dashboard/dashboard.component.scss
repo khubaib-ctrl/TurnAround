@@ -557,6 +557,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  &.path-placeholder {
+    font-style: italic;
+    font-family: inherit;
+    opacity: 0.6;
+  }
 }
 
 .dialog-error {
@@ -627,4 +633,43 @@
   font-size: $font-size-xs;
   color: $text-muted;
   padding: 8px 0;
+}
+
+.auto-filled-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: $bg-tertiary;
+  border: 1px solid $border-color;
+  border-radius: $radius-md;
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.auto-label {
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.auto-sep {
+  color: $border-light;
+  margin: 0 2px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: $accent-primary;
+  font-size: $font-size-xs;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

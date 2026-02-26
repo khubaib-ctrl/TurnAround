@@ -1,12 +1,12 @@
 [package]
-name = "editgit"
+name = "turnaround"
 version = "0.1.0"
 edition = "2021"
 description = "A specialized version control system for video production"
 license = "MIT"
 
 [lib]
-name = "editgit_lib"
+name = "turnaround_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

@@ -5,7 +5,7 @@ use notify::{RecommendedWatcher, RecursiveMode, Watcher, Config};
 use std::path::PathBuf;
 use std::sync::mpsc;
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Emitter};
 use serde::Serialize;
 
 #[derive(Debug, Serialize, Clone)]
@@ -96,9 +96,6 @@ fn start_project_watcher(app: AppHandle, watch_path: &PathBuf) -> Result<Recomme
                 let _ = app_clone.emit("editgit://file-changed", &payload);
             }
 
-            if let Some(win) = app_clone.get_webview_window("main") {
-                let _ = win.set_focus();
-            }
         }
     });
 
@@ -170,10 +167,6 @@ fn start_resolve_watcher(
                 kind: "modified".to_string(),
             };
             let _ = app_clone.emit("editgit://file-changed", &payload);
-
-            if let Some(win) = app_clone.get_webview_window("main") {
-                let _ = win.set_focus();
-            }
         }
     });
 

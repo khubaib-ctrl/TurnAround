@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "editgit": {
+    "turnaround": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -43,7 +43,7 @@
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "outputPath": "dist/editgit",
+            "outputPath": "dist/turnaround",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -85,10 +85,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "editgit:build:production"
+              "buildTarget": "turnaround:build:production"
             },
             "development": {
-              "buildTarget": "editgit:build:development"
+              "buildTarget": "turnaround:build:development"
             }
           },
           "defaultConfiguration": "development"

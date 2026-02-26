@@ -4,6 +4,10 @@ npm-debug.log*
 
 # Angular build output
 dist/
+.angular/
+*.tsbuildinfo
+angular-compiler.db
+angular-compiler.db-lock
 
 # Rust / Cargo build output
 target/
@@ -28,3 +32,4 @@ Thumbs.db
 
 # Tauri
 src-tauri/gen/
+src-tauri/target/

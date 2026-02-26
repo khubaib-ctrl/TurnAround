@@ -78,13 +78,15 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
     }
 
     this.watcherSub = this.watcherService.fileChanged$.subscribe((event: FileChangeEvent) => {
+      const projectRoot = this.project()?.root_path;
+      const relativePath = projectRoot && event.path.startsWith(projectRoot)
+        ? event.path.slice(projectRoot.length).replace(/^\//, '')
+        : event.path.split('/').pop() || event.path;
+
       this.changedFiles.update((files) => {
-        if (!files.includes(event.path)) {
-          return [...files, event.path];
-        }
-        return files;
+        const filtered = files.filter(f => f !== relativePath);
+        return [...filtered, relativePath];
       });
-      this.showCommitDialog.set(true);
     });
 
     this.changeCheckInterval = setInterval(() => this.checkForChangesAndShowDialog(), this.CHANGE_CHECK_MS);
@@ -103,8 +105,6 @@ export class WorkspaceComponent implements OnInit, OnDestroy {
       const files = await this.vcsService.getChangedFiles();
       if (files.length > 0) {
         this.changedFiles.set(files);
-        this.showCommitDialog.set(true);
-        await this.vcsService.focusWindow();
       }
     } catch {
       // ignore (e.g. no project)
