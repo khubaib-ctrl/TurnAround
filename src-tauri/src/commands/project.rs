@@ -47,6 +47,35 @@ pub fn init_project(
     let obj_store = ObjectStore::new(&editgit_dir);
     obj_store.init()?;
 
+    if let Some(existing) = schema::get_project_by_path(&db.conn, &path)? {
+        let active_branch = schema::get_active_branch(&db.conn, &existing.id)?;
+
+        {
+            let mut db_lock = state.db.lock();
+            *db_lock = db;
+        }
+        {
+            let mut path_lock = state.active_project_path.lock();
+            *path_lock = Some(path);
+        }
+
+        {
+            let reg = state.registry.lock();
+            let now = Utc::now().to_rfc3339();
+            if let Err(e) = reg.touch_project(&existing.id, &now) {
+                log::warn!("Failed to update last-opened timestamp: {e}");
+            }
+        }
+
+        return Ok(ProjectInfo {
+            id: existing.id,
+            name: existing.name,
+            root_path: existing.root_path,
+            created_at: existing.created_at,
+            active_branch,
+        });
+    }
+
     let project_id = Uuid::new_v4().to_string();
     let now = Utc::now().to_rfc3339();
 
