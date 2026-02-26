@@ -1,0 +1,88 @@
+{
+  "hash": "b795f6c1",
+  "configHash": "26a9e242",
+  "lockfileHash": "3b432c29",
+  "browserHash": "84945545",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "b29a1901",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "28b611a0",
+      "needsInterop": false
+    },
+    "@angular/forms": {
+      "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
+      "file": "@angular_forms.js",
+      "fileHash": "f62c28f1",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "8a8636a6",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "ece3c19f",
+      "needsInterop": false
+    },
+    "@tauri-apps/api/core": {
+      "src": "../../../../../../node_modules/@tauri-apps/api/core.js",
+      "file": "@tauri-apps_api_core.js",
+      "fileHash": "ed0e9589",
+      "needsInterop": false
+    },
+    "@tauri-apps/api/event": {
+      "src": "../../../../../../node_modules/@tauri-apps/api/event.js",
+      "file": "@tauri-apps_api_event.js",
+      "fileHash": "9c7e6703",
+      "needsInterop": false
+    },
+    "@tauri-apps/plugin-dialog": {
+      "src": "../../../../../../node_modules/@tauri-apps/plugin-dialog/dist-js/index.js",
+      "file": "@tauri-apps_plugin-dialog.js",
+      "fileHash": "e5b68dfb",
+      "needsInterop": false
+    },
+    "rxjs": {
+      "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
+      "file": "rxjs.js",
+      "fileHash": "4513e3ee",
+      "needsInterop": false
+    },
+    "zone.js": {
+      "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
+      "file": "zone__js.js",
+      "fileHash": "0e49e33c",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-XFCJDQLS": {
+      "file": "chunk-XFCJDQLS.js"
+    },
+    "chunk-3Q3OAZPQ": {
+      "file": "chunk-3Q3OAZPQ.js"
+    },
+    "chunk-XTFCKTP4": {
+      "file": "chunk-XTFCKTP4.js"
+    },
+    "chunk-TZXN6MJU": {
+      "file": "chunk-TZXN6MJU.js"
+    },
+    "chunk-RSS3ODKE": {
+      "file": "chunk-RSS3ODKE.js"
+    },
+    "chunk-GOMI4DH3": {
+      "file": "chunk-GOMI4DH3.js"
+    }
+  }
+}
