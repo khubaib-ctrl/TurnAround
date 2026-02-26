@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RegistryService } from '../../services/registry.service';
 import { ProjectService } from '../../services/project.service';
+import { WatcherService, ResolveProject } from '../../services/watcher.service';
 import { ProjectEntry, UserProfile } from '../../models/project.model';
 import { extractError } from '../../models/error.model';
 import { open } from '@tauri-apps/plugin-dialog';
@@ -20,6 +21,7 @@ type SortMode = 'recent' | 'name' | 'size' | 'commits';
 export class DashboardComponent implements OnInit {
   private registryService = inject(RegistryService);
   private projectService = inject(ProjectService);
+  private watcherService = inject(WatcherService);
   private router = inject(Router);
 
   searchQuery = signal('');
@@ -36,6 +38,10 @@ export class DashboardComponent implements OnInit {
   newProjectPath = signal('');
   creatingProject = signal(false);
   newProjectError = signal('');
+
+  resolveProjects = signal<ResolveProject[]>([]);
+  selectedResolveDb = signal('');
+  loadingResolve = signal(false);
 
   renamingProject = signal<string | null>(null);
   renameValue = signal('');
@@ -116,11 +122,21 @@ export class DashboardComponent implements OnInit {
 
   // ── New Project ──
 
-  openNewProjectDialog() {
+  async openNewProjectDialog() {
     this.newProjectName.set('');
     this.newProjectPath.set('');
     this.newProjectError.set('');
+    this.selectedResolveDb.set('');
     this.showNewProjectDialog.set(true);
+    this.loadingResolve.set(true);
+    try {
+      const projects = await this.watcherService.listResolveProjects();
+      this.resolveProjects.set(projects);
+    } catch {
+      this.resolveProjects.set([]);
+    } finally {
+      this.loadingResolve.set(false);
+    }
   }
 
   async pickFolder() {
@@ -140,6 +156,9 @@ export class DashboardComponent implements OnInit {
     this.newProjectError.set('');
     try {
       await this.projectService.initProject(this.newProjectPath(), this.newProjectName());
+      if (this.selectedResolveDb()) {
+        await this.watcherService.linkResolveProject(this.selectedResolveDb());
+      }
       await this.projectService.closeProject();
       await this.registryService.loadProjects();
       this.showNewProjectDialog.set(false);
