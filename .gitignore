@@ -2,9 +2,12 @@
 node_modules/
 npm-debug.log*
 
-# Angular
-.angular/cache/
+# Angular build output
 dist/
+.angular/
+*.tsbuildinfo
+angular-compiler.db
+angular-compiler.db-lock
 
 # Rust / Cargo build output
 target/
@@ -28,5 +31,5 @@ target/
 Thumbs.db
 
 # Tauri
-.tauri/
 src-tauri/gen/
+src-tauri/target/
