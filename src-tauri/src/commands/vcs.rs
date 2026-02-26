@@ -130,7 +130,25 @@ pub fn restore_commit(
     let db = state.db.lock();
     let editgit_dir = Path::new(&project_path).join(".editgit");
     let obj_store = ObjectStore::new(&editgit_dir);
-    Ok(vcs::commit::restore_commit(&db.conn, &commit_id, Path::new(&project_path), &obj_store)?)
+    let report = vcs::commit::restore_commit(&db.conn, &commit_id, Path::new(&project_path), &obj_store)?;
+
+    let restored_resolve_db = Path::new(&project_path).join("ResolveProject.db");
+    if restored_resolve_db.exists() {
+        let resolve_db_path = state.resolve_db_path.lock().clone();
+        if let Some(resolve_dest) = resolve_db_path {
+            let dest_path = Path::new(&resolve_dest);
+            if let Some(parent) = dest_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            if let Err(e) = std::fs::copy(&restored_resolve_db, dest_path) {
+                log::warn!("Failed to push restored DB back to Resolve: {e}");
+            } else {
+                log::info!("Restored Resolve DB to {resolve_dest}");
+            }
+        }
+    }
+
+    Ok(report)
 }
 
 #[tauri::command]
@@ -158,4 +176,18 @@ pub fn switch_branch(
     let project = schema::get_project_by_path(&db.conn, &project_path)?
         .ok_or(AppError::ProjectNotFound)?;
     Ok(vcs::branch::switch_branch(&db.conn, &project.id, &branch_id)?)
+}
+
+#[tauri::command]
+pub fn get_changed_files(state: State<AppState>) -> Result<Vec<String>, AppError> {
+    let project_path = state.active_project_path.lock().clone()
+        .ok_or(AppError::NoActiveProject)?;
+    let db = state.db.lock();
+    let project = schema::get_project_by_path(&db.conn, &project_path)?
+        .ok_or(AppError::ProjectNotFound)?;
+    Ok(vcs::commit::get_changed_files(
+        &db.conn,
+        &project.id,
+        Path::new(&project_path),
+    )?)
 }
