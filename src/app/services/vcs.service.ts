@@ -132,6 +132,15 @@ export class VcsService {
     return this.tauri.invoke<ExportReport>('export_commit', { commitId, destPath });
   }
 
+  /** Compare disk state to head commit. Catches changes the file watcher may miss (e.g. DaVinci Resolve atomic saves). */
+  async getChangedFiles(): Promise<string[]> {
+    return this.tauri.invoke<string[]>('get_changed_files');
+  }
+
+  async focusWindow(): Promise<void> {
+    await this.tauri.invoke<void>('focus_window');
+  }
+
   async selectCommit(commit: Commit | null) {
     this._selectedCommit.set(commit);
     if (commit) {
