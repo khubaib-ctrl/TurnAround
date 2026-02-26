@@ -16,6 +16,7 @@ pub struct AppState {
     pub db: Arc<Mutex<db::Database>>,
     pub watcher_handle: Arc<Mutex<Option<watcher::WatcherHandle>>>,
     pub active_project_path: Arc<Mutex<Option<String>>>,
+    pub resolve_db_path: Arc<Mutex<Option<String>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -31,6 +32,7 @@ pub fn run() {
         db: Arc::new(Mutex::new(db::Database::new_in_memory().expect("Failed to init database"))),
         watcher_handle: Arc::new(Mutex::new(None)),
         active_project_path: Arc::new(Mutex::new(None)),
+        resolve_db_path: Arc::new(Mutex::new(None)),
     };
 
     tauri::Builder::default()
@@ -66,8 +68,14 @@ pub fn run() {
             commands::vcs::restore_commit,
             commands::vcs::export_commit,
             commands::vcs::switch_branch,
+            commands::vcs::get_changed_files,
             commands::watcher::start_watching,
             commands::watcher::stop_watching,
+            commands::watcher::focus_window,
+            commands::watcher::list_resolve_projects,
+            commands::watcher::link_resolve_project,
+            commands::watcher::unlink_resolve_project,
+            commands::watcher::get_linked_resolve_project,
             commands::timeline::get_timeline_diff,
             commands::timeline::parse_timeline_file,
         ])
